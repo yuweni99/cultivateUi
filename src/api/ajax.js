@@ -1,27 +1,31 @@
 import axios from 'axios'
+import {DELETE,GET,POST,PUT} from './requestTypes'
 //携带cookie
 axios.defaults.withCredentials = true;
 
-export default function ajax(url,data,method = 'get') {
+
+export default function ajax(url,data,method = GET) {
 
   return new Promise((resolve,reject) =>{
+
+
     let promise;
 
     switch (method) {
-      case "get": {
+      case GET: {
         promise = sendGetReq(data,url);
         break;
       }
-      case "post":{
+      case POST:{
         promise = sendPostReq(data,url);
         break;
       }
-      case "put":{
+      case PUT:{
         promise = sendPutReq(data,url);
         break;
       }
-      case "delete":{
-        promise = sendDeleteReq(url);
+      case DELETE:{
+        promise = sendDeleteReq(data,url);
         break;
       }
     }
@@ -64,8 +68,8 @@ const sendPostReq = (data,url) => {
 };
 
 //发送delete请求
-const sendDeleteReq = (url) => {
-  return axios.delete(url);
+const sendDeleteReq = (data,url) => {
+  return axios.delete(url,data);
 };
 
 //发送put请求
