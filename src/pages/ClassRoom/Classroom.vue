@@ -114,6 +114,7 @@
         ids: [],
         dialogVisible: false,
         classrooms: [], //教室集合
+
         title: '', //弹框层标题
         message: '',
         rules: {
@@ -133,7 +134,7 @@
         //打开弹出层页面
         this.openEditPage(false);
         //查询课程信息
-        const result = await classroomApi.getCourse(id);
+        const result = await classroomApi.getClassroom(id);
         if(result.success){
           const {object} = result;
           this.classroom = object;
@@ -184,7 +185,7 @@
 
 
           //发送请求删除数据
-          const result = await classroomApi.delCourses(ids);
+          const result = await classroomApi.delClassrooms(ids);
 
           const type = result.success?'success':'info';
 
@@ -238,7 +239,7 @@
 
         //构建搜索过滤对象
         const searchCourse = {searchName};
-        const result = await classroomApi.getCoursePageQuery(pageNum, pageSize, searchCourse);
+        const result = await classroomApi.getClassroomPageQuery(pageNum, pageSize, searchCourse);
 
         if (result.success) {
           //获取课程集合
@@ -261,7 +262,7 @@
           if (valid) {
 
             const {classroom} = this;
-            const result = await classroomApi.saveCourse(classroom);
+            const result = await classroomApi.saveClassroom(classroom);
 
             if(result.success){  //成功
 

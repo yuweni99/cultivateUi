@@ -1,114 +1,92 @@
 <template>
-  <div class="testProject">
+  <div>
     <div class="function">
       <el-input class="searchInput"
-                placeholder="请输入课程名称"
+                placeholder="用户名"
                 icon="search"
-                v-model="searchName">
+                v-model="pageRequestParams.searchName">
       </el-input>
-      <el-button class="searchButton" >搜索</el-button>
+      <el-button class="searchButton" @click="pageQuery">搜索</el-button>
     </div>
     <div class="functionRight">
-      <el-button type="success" @click="onNewClick">添加</el-button>
+      <el-button type="success" @click="openEditPage(true)">添加</el-button>
       <el-button type="primary" @click="delSelect">删除选中</el-button>
     </div>
     <div>
       <el-table
         :data="users"
         border
+        v-loading="loading"
         @selection-change="handleSelectionChange">
         <el-table-column
-          type="selection"
-          prop="userId"
-          label="id">
+          type="selection">
         </el-table-column>
         <el-table-column
-          prop="userId"
-          label="id">
-        </el-table-column>
-
-        <el-table-column
-          prop="userName"
-          label="姓名">
-        </el-table-column>
-
-        <el-table-column
-          prop="userBelongCourse"
-          label="所选课程">
+          prop="id"
+          label="编号">
         </el-table-column>
         <el-table-column
-          prop="userCourseNum"
-          label="所选课程数量">
+          prop="roleId"
+          label="用户类型">
         </el-table-column>
         <el-table-column
-          prop="userPhone"
-          label="手机号码">
+          prop="phone"
+          label="手机号">
         </el-table-column>
         <el-table-column
-          prop="userPassword"
-          label="密码">
+          prop="courseId"
+          label="课程名称">
         </el-table-column>
         <el-table-column
-          prop="userCreateTime"
-          label="用户创建时间">
+          prop="createTime"
+          label="创建时间">
         </el-table-column>
         <el-table-column
-          prop="userUpdateTime"
+          prop="updateTime"
           label="修改时间">
         </el-table-column>
-
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
               size="mini"
-              @click="handleEdit(scope.$index, scope.row)">编辑
+              @click="toEdit(scope.row.id)">编辑
             </el-button>
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)">删除
+              @click="delCourse(scope.row.id)">删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination class="page"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :page-sizes="[5, 10, 20]"
+                     :page-size="pageRequestParams.pageSize"
                      background
-                     layout="prev, pager, next"
-                     :page-size="5"
-                     :total="20">
+                     layout="total, sizes, prev, pager, next, jumper"
+                     :total="pageData.total">
       </el-pagination>
     </div>
     <div>
-      <el-dialog :visible="dialogVisible" title="测试" :before-close="changeAddPageState">
-        <el-form status-icon :model="user" :rules="rules" ref="userForm" label-width="80px">
-          <el-form-item label="id" prop="userId">
-            <el-input v-model="user.userId"/>
+      <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
+        <el-form status-icon ref="courseForm" :model="user" :rules="rules" label-width="150px">
+          <el-form-item label="用户名称:" prop="name">
+            <el-input v-model="user.name"/>
           </el-form-item>
-          <el-form-item label="姓名" prop="usertName">
-            <el-input v-model="user.usertName"/>
+          <el-form-item label="手机号:" prop="description">
+            <el-input v-model="user.phone"/>
           </el-form-item>
-
-          <el-form-item label="所选课程" prop="userBelongCourse">
-            <el-input v-model="user.userBelongCourse"/>
+          <el-form-item label="课程名称:" prop="teachingNum">
+            <el-input type="text" v-model="user.courseId"/>
           </el-form-item>
-          <el-form-item label="所选课程数量" prop="userCourseNum">
-            <el-input v-model="user.userCourseNum"/>
-          </el-form-item>
-          <el-form-item label="手机号码" prop="userPhone">
-            <el-input v-model="user.userPhone"/>
-          </el-form-item>
-          <el-form-item label="密码" prop="userPassword">
-            <el-input v-model="user.userPassword"/>
-          </el-form-item>
-          <el-form-item label="创建时间" prop="userCreateTime">
-            <el-input v-model="user.userCreateTime"/>
-          </el-form-item>
-          <el-form-item label="修改时间" prop="userUpdateTime">
-            <el-input v-model="user.userUpdateTime"/>
+          <el-form-item label="用户类型:" prop="ableSelectNum">
+            <el-input type="text" v-model="course.ableSelectNum"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="addUser">添加</el-button>
-            <el-button @click="changeAddPageState">取消</el-button>
+            <el-button type="primary" @click="save">保存</el-button>
+            <el-button @click="changeEditPageState">取消</el-button>
           </el-form-item>
         </el-form>
       </el-dialog>
@@ -117,85 +95,91 @@
 </template>
 
 <script>
+
+  import * as courseApi from '../../api/course'
+  import * as userApi from '../../api/user'
+
   export default {
     data() {
       return {
-          searchName:'',
-        user: {
-          userId:'',
-          userName: '',
-          userBelongCourse: '',
-          userCourseNum: '',
-          userPhone: '',
-          userPassword: '',
-          userCreateTime: '',
-          userUpdateTime: ''
+        course: {
+          id: '',
+          name: '',
+          description: '',
+          teachingNum: '',
+          ableSelectNum: '',
+          createTime: '',
+          updateTime: '',
         },
-        //用户选择的记录
-        userIds:[],
+        user: {
+          id:'',
+          name: '',
+          roleId: '',
+          courseId: '',
+          phone: '',
+          userPassword: '',
+          createTime: '',
+          updateTime: ''
+        },
+        users: [], //用户集合
+        pageRequestParams: {
+          pageSize: 5, //每页记录数默认为5
+          pageNum: 1, //起始页
+          searchName: '', //搜索字段
+        },
+        pageData: {
+          total: 1, //总记录数
+        },
+        loading: true, //遮罩效果
+        ids: [],
         dialogVisible: false,
-        users: [{
-          userId: 1,
-          userName: '张三',
-          userBelongCourse: 'JAVA',
-          userCourseNum: 1,
-          userPhone: 13322334455,
-          userPassword: '123456',
-          userCreateTime: '2017/2/01',
-          userUpdateTime: '2017/3/01'
-        }],
-        message:'',
-        rules:{
-          userId: [
+        courses: [], //课程数组
+        title: '', //弹框层标题
+        message: '',
+        rules: {
+          id: [
             {
               validator: (rule, value, callback) => {
                 this.validator(rule, value, callback, "id不能为空")
               }, trigger: 'blur'
             }
           ],
-          userName: [
+          name: [
             {
               validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "姓名不能为空")
+                this.validator(rule, value, callback, "课程名称不能为空")
               }, trigger: 'blur'
             }
           ],
-          userBelongCourse: [
+          description: [
             {
               validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "所选课程不能为空")
+                this.validator(rule, value, callback, "课程描述不能为空")
               }, trigger: 'blur'
             }
           ],
-          userCourseNum: [
+          teachingNum: [
             {
               validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "所选课程数量不能为空")
+                this.validator(rule, value, callback, "课时不能为空")
               }, trigger: 'blur'
             }
           ],
-         userPhone: [
+          ableSelectNum: [
             {
               validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "手机号码不能为空")
+                this.validator(rule, value, callback, "可选人数不能为空或者为0")
               }, trigger: 'blur'
             }
           ],
-          userPassword: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "密码不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          userCreateTime: [
+          createTime: [
             {
               validator: (rule, value, callback) => {
                 this.validator(rule, value, callback, "创建时间不能为空")
               }, trigger: 'blur'
             }
           ],
-          userUpdateTime: [
+          updateTime: [
             {
               validator: (rule, value, callback) => {
                 this.validator(rule, value, callback, "修改时间不能为空")
@@ -205,9 +189,30 @@
         }
       }
     },
-
     methods: {
+      // 表格内删除按钮点击实现
+      async toEdit(id) {
+        //打开弹出层页面
+        this.openEditPage(false);
+        //查询课程信息
+        const result = await courseApi.getCourse(id);
+        if(result.success){
+          const {object} = result;
+          this.course = object;
+        }else{
+          this.$message(result.message);
+          //关闭弹出层界面
+          this.changeEditPageState();
+        }
 
+      },
+      //删除
+      delCourse(id) {
+        this.dels([id]);
+      },
+      handleSelectionChange(val) {
+        this.ids = val.map((item) => item.id);
+      },
       //非空校验
       validator(rule, value, callback, message) {
         if (!value) {
@@ -216,36 +221,11 @@
           callback();
         }
       },
-      addUser(){
-        this.$refs.userForm.validate((valid) => {
-          if (valid) {
-            this.$message('登陆成功');
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
-      // 表格内删除按钮点击实现
-      onNewClick: function () {
-        this.dialogTitle = "新建方案";
-        this.dialogVisible = true;
-      },
-      handleEdit(index, row) {
-        this.dialogVisible = true;
-      },
-      handleDelete(index, row) {
-        console.log(index, row);
-      },
-      handleSelectionChange(val) {
-        this.userIds = val.map((item) => item.userIds);
-      },
       //删除选中的数据
-      delSelect(){
+      delSelect() {
         //校验
-        const {userIds} = this;
-
-        if(!userIds.length){
+        const {ids} = this;
+        if (!ids.length) {
           this.$notify({
             title: '警告',
             message: '请选择要删除的数据',
@@ -254,32 +234,144 @@
           return;
         }
 
-        this.$confirm('请确认是否选中选择的数据，删除的数据不可恢复?', '提示', {
+        this.dels(this.ids);
+
+      },
+      //删除课程集合调用方法
+      dels(ids){
+
+        this.$confirm('请注意，删除的数据不可恢复!!!', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then(() => {
+        }).then(async () => {
+
+
+          //发送请求删除数据
+          const result = await courseApi.delCourses(ids);
+
+          const type = result.success?'success':'info';
+
+          const {success,message} = result;
+          if(success){ //删除成功
+            //刷新页面
+            this.pageQuery();
+          }
+
           this.$message({
-            type: 'success',
-            message: '删除成功!'
+            type,
+            message
           });
-          console.log(this.userIds);
+
         });
 
       },
-      //打开或关闭添加
-      changeAddPageState(){
+
+      openEditPage(isAdd) { //type true为添加,false为修改
+        this.title = isAdd ? '添加课程信息' : '修改课程信息';
+        this.changeEditPageState();
+      },
+      //更改弹出层页面状态
+      changeEditPageState() {
         const {dialogVisible} = this;
-
         this.dialogVisible = !dialogVisible;
-
+        //动态计算课程信息
         //如果是关闭，则清空校验错误信息
-        if(!this.dialogVisible){
-          this.$refs.userForm.resetFields();
+        if (!this.dialogVisible) {
+          //清空表单数据校验信息
+          this.$refs.courseForm.resetFields();
+          this.course = {};
         }
 
+      },
+      //更改页码触发
+      handleCurrentChange(val) {
+        this.pageRequestParams.pageNum = val;
+        this.pageQuery();
+      },
+      //更改每页记录数触发
+      handleSizeChange(val) {
+        this.pageRequestParams.pageSize = val;
+        this.pageQuery();
+      },
+      //分页查询数据
+      async pageQuery() {
+
+        const {pageSize, pageNum, searchName} = this.pageRequestParams;
+
+        //构建搜索过滤对象
+        const searchUser = {searchName};
+        const result = await userApi.getUserPageQuery(pageNum, pageSize, searchUser);
+
+        if (result.success) {
+          //获取课程集合
+          const {list, total} = result.queryResult;
+          this.users = list; //数据
+          this.pageData.total = total; //总记录数
+
+          //关闭遮罩
+          this.loading = false;
+
+        } else {
+          this.$message(result.message);
+        }
+      },
+      //保存数据
+      save(){
+
+        //校验表单
+        this.$refs.courseForm.validate(async (valid) => {
+          if (valid) {
+
+            const {course} = this;
+            const result = await courseApi.saveCourse(course);
+
+            if(result.success){  //成功
+
+              //讲修改后的新数据保存到课程集合中
+              const course = result.object; //新的课程信息
+
+              this.saveCourse(course);
+
+              this.$message({
+                message: '操作成功',
+                type: 'success'
+              });
+              //关闭弹出层
+              this.changeEditPageState();
+            }else{ //失败
+              this.$message(result.message);
+            }
+
+          } else {
+            return false;
+          }
+        });
+
+
+      },
+      //保存或修改新课程信息
+      saveCourse(course){
+
+        //获取课程集合
+        const {courses} = this;
+
+        //根据id查询下标
+        const index = courses.findIndex((c) => c.id === course.id);
+        if(index !==   -1){ //存在则为修改的数据
+          courses.splice(index,1,course);
+        }else{ //添加的新数据
+          courses.splice(courses.length-1,1); //删除最后一个数据
+          courses.unshift(course); //头部添加一个新数据
+        }
+
+        this.courses = courses;
       }
-    }
+    },
+    mounted() {
+
+      this.pageQuery();
+    },
   }
 </script>
 
@@ -292,21 +384,14 @@
   .page {
     margin: 0 35%
   }
+
   .searchInput {
     width: 200px;
   }
-  .functionRight{
+
+  .functionRight {
     display: inline-block;
     float: right;
   }
-  .myclearfix:after{/*伪元素是行内元素 正常浏览器清除浮动方法*/
-    content: "";
-    display: block;
-    height: 0;
-    clear:both;
-    visibility: hidden;
-  }
-  .myclearfix{
-    *zoom: 1;/*ie6清除浮动的方式 *号只有IE6-IE7执行，其他浏览器不执行*/
-  }
+
 </style>
