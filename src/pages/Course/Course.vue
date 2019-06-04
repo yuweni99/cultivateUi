@@ -20,12 +20,11 @@
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="id"
-          label="id">
+          prop="id">
         </el-table-column>
         <el-table-column
           prop="id"
-          label="id">
+          label="编号">
         </el-table-column>
 
         <el-table-column
@@ -324,7 +323,7 @@
             if(result.success){  //成功
 
               //讲修改后的新数据保存到课程集合中
-              const course = result.course; //新的课程信息
+              const course = result.object; //新的课程信息
 
               this.saveCourse(course);
 
