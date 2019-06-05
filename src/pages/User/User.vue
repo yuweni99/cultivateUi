@@ -26,6 +26,10 @@
           label="编号">
         </el-table-column>
         <el-table-column
+          prop="name"
+          label="用户名">
+        </el-table-column>
+        <el-table-column
           prop="roleId"
           label="用户类型">
         </el-table-column>
@@ -54,7 +58,7 @@
             <el-button
               size="mini"
               type="danger"
-              @click="delCourse(scope.row.id)">删除
+              @click="delUser(scope.row.id)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -75,14 +79,18 @@
           <el-form-item label="用户名称:" prop="name">
             <el-input v-model="user.name"/>
           </el-form-item>
-          <el-form-item label="手机号:" prop="description">
+          <el-form-item label="密码:" prop="password">
+            <el-input type="text" v-model="user.password"/>
+          </el-form-item>
+          <el-form-item label="手机号:" prop="phone">
             <el-input v-model="user.phone"/>
           </el-form-item>
-          <el-form-item label="课程名称:" prop="teachingNum">
-            <el-input type="text" v-model="user.courseId"/>
-          </el-form-item>
-          <el-form-item label="用户类型:" prop="ableSelectNum">
-            <el-input type="text" v-model="course.ableSelectNum"/>
+          <!--<el-form-item label="用户类型:" prop="type">
+            <el-input disabled="isAdd" type="text" v-model="user.roleId"/>
+          </el-form-item>-->
+          <el-form-item  label="用户类型">
+            <el-radio :disabled="!isAdd" v-model="user.roleId" name="roleId" :label="0">用户</el-radio>
+            <el-radio :disabled="!isAdd" v-model="user.roleId" name="roleId" :label="1">教师</el-radio>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="save">保存</el-button>
@@ -96,28 +104,20 @@
 
 <script>
 
-  import * as courseApi from '../../api/course'
   import * as userApi from '../../api/user'
 
   export default {
     data() {
       return {
-        course: {
-          id: '',
-          name: '',
-          description: '',
-          teachingNum: '',
-          ableSelectNum: '',
-          createTime: '',
-          updateTime: '',
-        },
+        isAdd: false, //表单操作类型
         user: {
           id:'',
           name: '',
-          roleId: '',
+          roleId: 0, //默认用户
           courseId: '',
           phone: '',
-          userPassword: '',
+          type: '', //用户类型别名
+          password: '',
           createTime: '',
           updateTime: ''
         },
@@ -137,68 +137,48 @@
         title: '', //弹框层标题
         message: '',
         rules: {
-          id: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
-          ],
+
           name: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程名称不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程名称不能为空', trigger: 'blur' }
           ],
-          description: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程描述不能为空")
-              }, trigger: 'blur'
-            }
+          password: [
+            { required: true, message: '密码不能为空', trigger: 'blur' },
           ],
-          teachingNum: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课时不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          ableSelectNum: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "可选人数不能为空或者为0")
-              }, trigger: 'blur'
-            }
-          ],
-          createTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "创建时间不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          updateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "修改时间不能为空")
-              }, trigger: 'blur'
-            }
-          ],
+          phone: { validator: this.validatorPhone, trigger: 'blur' },
+          type: [
+            { required: true, message: '用户类型', trigger: 'blur' }
+          ]
         }
       }
     },
     methods: {
+      validatorPhone(rule, value, callback){
+        if (value === '') {
+          callback(new Error('手机号不能为空'));
+          return;
+        }
+
+        //检验手机号是否合法
+        const reg = /^[1][3,4,5,7,8][0-9]{9}$/;
+
+        if(!reg.test(value)){
+          callback(new Error('手机号码不合法'));
+          return;
+        }
+
+        callback();
+
+
+      },
       // 表格内删除按钮点击实现
       async toEdit(id) {
         //打开弹出层页面
         this.openEditPage(false);
         //查询课程信息
-        const result = await courseApi.getCourse(id);
+        const result = await userApi.getUser(id);
         if(result.success){
           const {object} = result;
-          this.course = object;
+          this.user = object;
         }else{
           this.$message(result.message);
           //关闭弹出层界面
@@ -207,7 +187,7 @@
 
       },
       //删除
-      delCourse(id) {
+      delUser(id) {
         this.dels([id]);
       },
       handleSelectionChange(val) {
@@ -246,9 +226,8 @@
           type: 'warning'
         }).then(async () => {
 
-
           //发送请求删除数据
-          const result = await courseApi.delCourses(ids);
+          const result = await userApi.delUsers(ids);
 
           const type = result.success?'success':'info';
 
@@ -268,7 +247,8 @@
       },
 
       openEditPage(isAdd) { //type true为添加,false为修改
-        this.title = isAdd ? '添加课程信息' : '修改课程信息';
+        this.isAdd = isAdd;
+        this.title = isAdd ? '添加用户信息' : '修改用户信息';
         this.changeEditPageState();
       },
       //更改弹出层页面状态
@@ -280,7 +260,8 @@
         if (!this.dialogVisible) {
           //清空表单数据校验信息
           this.$refs.courseForm.resetFields();
-          this.course = {};
+          this.user = {};
+          this.user.roleId = 0;
         }
 
       },
@@ -323,15 +304,15 @@
         this.$refs.courseForm.validate(async (valid) => {
           if (valid) {
 
-            const {course} = this;
-            const result = await courseApi.saveCourse(course);
+            const {user} = this;
+            const result = await userApi.saveUser(user);
 
             if(result.success){  //成功
 
               //讲修改后的新数据保存到课程集合中
-              const course = result.object; //新的课程信息
+              const user = result.object; //新的课程信息
 
-              this.saveCourse(course);
+              this.saveUser(user);
 
               this.$message({
                 message: '操作成功',
@@ -351,21 +332,21 @@
 
       },
       //保存或修改新课程信息
-      saveCourse(course){
+      saveUser(user){
 
         //获取课程集合
-        const {courses} = this;
+        const {users} = this;
 
         //根据id查询下标
-        const index = courses.findIndex((c) => c.id === course.id);
+        const index = users.findIndex((c) => c.id === user.id);
         if(index !==   -1){ //存在则为修改的数据
-          courses.splice(index,1,course);
+          users.splice(index,1,user);
         }else{ //添加的新数据
-          courses.splice(courses.length-1,1); //删除最后一个数据
-          courses.unshift(course); //头部添加一个新数据
+          users.splice(users.length-1,1); //删除最后一个数据
+          users.unshift(user); //头部添加一个新数据
         }
 
-        this.courses = courses;
+        this.users = users;
       }
     },
     mounted() {

@@ -93,18 +93,12 @@
         message:'',
         rules:{
           attendInfoId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
           attendInfoStatus: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "上课状态不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '上课状态不能为空', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ]
         }
 

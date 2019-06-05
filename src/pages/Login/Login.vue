@@ -32,18 +32,12 @@
         //表单校验
         rules: {
           username: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "用户名不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '用户名不能为空', trigger: 'blur' },
+            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           ],
           password: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "密码不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '密码不能为空', trigger: 'blur' },
+            { min: 8, max: 18, message: '长度在 8 到 18 个字符', trigger: 'blur' }
           ]
         }
       }

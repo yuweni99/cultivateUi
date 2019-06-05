@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="testProject">
     <div class="function">
       <el-input class="searchInput"
                 placeholder="请输入课程名称"
                 icon="search"
                 v-model="searchName">
       </el-input>
-      <el-button class="searchButton" >搜索</el-button>
+      <el-button class="searchButton">搜索</el-button>
     </div>
     <div class="functionRight">
       <el-button type="success" @click="onNewClick">添加</el-button>
@@ -14,46 +14,42 @@
     </div>
     <div>
       <el-table
-        :data="users"
+        :data="attendcourses"
         border
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="userId"
+          prop="id"
           label="id">
         </el-table-column>
         <el-table-column
-          prop="userId"
+          prop="id"
           label="id">
         </el-table-column>
 
         <el-table-column
-          prop="userName"
-          label="姓名">
+          prop="price"
+          label="课程价格">
         </el-table-column>
 
         <el-table-column
-          prop="userBelongCourse"
-          label="所选课程">
+          prop="courseId"
+          label="课程id">
         </el-table-column>
         <el-table-column
-          prop="userCourseNum"
-          label="所选课程数量">
+          prop="status"
+          label="课程状态">
         </el-table-column>
         <el-table-column
-          prop="userPhone"
-          label="手机号码">
+          prop="classroomId"
+          label="教室id">
         </el-table-column>
         <el-table-column
-          prop="userPassword"
-          label="密码">
+          prop="createTime"
+          label="创建时间">
         </el-table-column>
         <el-table-column
-          prop="userCreateTime"
-          label="用户创建时间">
-        </el-table-column>
-        <el-table-column
-          prop="userUpdateTime"
+          prop="updateTime"
           label="修改时间">
         </el-table-column>
 
@@ -80,34 +76,30 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" title="测试" :before-close="changeAddPageState">
-        <el-form status-icon :model="user" :rules="rules" ref="userForm" label-width="80px">
-          <el-form-item label="id" prop="userId">
-            <el-input v-model="user.userId"/>
+        <el-form status-icon :model="attendcourse" :rules="rules" ref="attendcourseForm" label-width="80px">
+          <el-form-item label="id" prop="id">
+            <el-input v-model="attendcourse.id"/>
           </el-form-item>
-          <el-form-item label="姓名" prop="usertName">
-            <el-input v-model="user.usertName"/>
+          <el-form-item label="课程价格" prop="price">
+            <el-input v-model="attendcourse.price"/>
           </el-form-item>
-
-          <el-form-item label="所选课程" prop="userBelongCourse">
-            <el-input v-model="user.userBelongCourse"/>
+          <el-form-item label="课程id" prop="courseId">
+            <el-input v-model="attendcourse.courseId"/>
           </el-form-item>
-          <el-form-item label="所选课程数量" prop="userCourseNum">
-            <el-input v-model="user.userCourseNum"/>
+          <el-form-item label="课程状态" prop="status">
+            <el-input v-model="attendcourse.status"/>
           </el-form-item>
-          <el-form-item label="手机号码" prop="userPhone">
-            <el-input v-model="user.userPhone"/>
+          <el-form-item label="教室id" prop="classroomId">
+            <el-input v-model="attendcourse.classroomId"/>
           </el-form-item>
-          <el-form-item label="密码" prop="userPassword">
-            <el-input v-model="user.userPassword"/>
+          <el-form-item label="创建时间" prop="createTime">
+            <el-input v-model="attendcourse.createTime"/>
           </el-form-item>
-          <el-form-item label="创建时间" prop="userCreateTime">
-            <el-input v-model="user.userCreateTime"/>
-          </el-form-item>
-          <el-form-item label="修改时间" prop="userUpdateTime">
-            <el-input v-model="user.userUpdateTime"/>
+          <el-form-item label="修改时间" prop="updateTime">
+            <el-input v-model="attendcourse.updateTime"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="addUser">添加</el-button>
+            <el-button type="primary" @click="addCourse">添加</el-button>
             <el-button @click="changeAddPageState">取消</el-button>
           </el-form-item>
         </el-form>
@@ -120,88 +112,58 @@
   export default {
     data() {
       return {
-        searchName:'',
-        user: {
-          userId:'',
-          userName: '',
-          userBelongCourse: '',
-          userCourseNum: '',
-          userPhone: '',
-          userPassword: '',
-          userCreateTime: '',
-          userUpdateTime: ''
+          searchName:'',
+        attendcourse: {
+          id:'',
+          price: '',
+          courseId: '',
+          status: '',
+          classroomId: '',
+          createTime: '',
+          updateTime: ''
         },
         //用户选择的记录
-        userIds:[],
+        ids:[],
         dialogVisible: false,
-        users: [{
-          userId: 1,
-          userName: '张三',
-          userBelongCourse: 'JAVA',
-          userCourseNum: 1,
-          userPhone: 13322334455,
-          userPassword: '123456',
-          userCreateTime: '2017/2/01',
-          userUpdateTime: '2017/3/01'
+        attendcourses: [{
+          id: 1,
+          price: 100,
+          courseId: 1,
+          status: '正在上课',
+          classroomId: 1001,
+          createTime: '2017/01/01',
+          updateTime: '2017/02/02'
         }],
         message:'',
         rules:{
-          userId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+          id: [
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
-          userName: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "姓名不能为空")
-              }, trigger: 'blur'
-            }
+          price: [
+            { required: true, message: '课程价格不能为空', trigger: 'blur' },
+            { min: 3, max: 4, message: '长度在 3 到 4 个字符', trigger: 'blur' }
           ],
-          userBelongCourse: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "所选课程不能为空")
-              }, trigger: 'blur'
-            }
+          courseId: [
+            { required: true, message: '课程id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
-          userCourseNum: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "所选课程数量不能为空")
-              }, trigger: 'blur'
-            }
+          status: [
+            { required: true, message: '课程状态不能为空', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
-         userPhone: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "手机号码不能为空")
-              }, trigger: 'blur'
-            }
+          classroomId: [
+            { required: true, message: '教室id不能为空', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
-          userPassword: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "密码不能为空")
-              }, trigger: 'blur'
-            }
+          createTime: [
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ],
-          userCreateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "创建时间不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          userUpdateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "修改时间不能为空")
-              }, trigger: 'blur'
-            }
-          ],
+          updateTime: [
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
+          ]
         }
       }
     },
@@ -216,8 +178,8 @@
           callback();
         }
       },
-      addUser(){
-        this.$refs.userForm.validate((valid) => {
+      addCourse(){
+        this.$refs.attendcourseForm.validate((valid) => {
           if (valid) {
             this.$message('登陆成功');
           } else {
@@ -238,14 +200,14 @@
         console.log(index, row);
       },
       handleSelectionChange(val) {
-        this.userIds = val.map((item) => item.userIds);
+        this.ids = val.map((item) => item.ids);
       },
       //删除选中的数据
       delSelect(){
         //校验
-        const {userIds} = this;
+        const {ids} = this;
 
-        if(!userIds.length){
+        if(!ids.length){
           this.$notify({
             title: '警告',
             message: '请选择要删除的数据',
@@ -263,7 +225,7 @@
             type: 'success',
             message: '删除成功!'
           });
-          console.log(this.userIds);
+          console.log(this.ids);
         });
 
       },
@@ -275,7 +237,7 @@
 
         //如果是关闭，则清空校验错误信息
         if(!this.dialogVisible){
-          this.$refs.userForm.resetFields();
+          this.$refs.attendcourseForm.resetFields();
         }
 
       }

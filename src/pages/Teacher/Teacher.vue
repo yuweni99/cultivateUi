@@ -123,53 +123,35 @@
           teacherId:1,
           teacherName: '鲁迅',
           teacherPassword: 'luxun666',
-          teacherCreateTime: '2017/1/01',
-          teacherUpdateTime: '2017/2/01',
+          teacherCreateTime: '2017/1/01 08:00:00',
+          teacherUpdateTime: '2017/2/01 09:00:00',
           teacherPhone: ''
         }],
         message:'',
         rules:{
           teacherId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
           teacherName: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "姓名不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '姓名不能为空', trigger: 'blur' },
+            { min: 4, max: 10, message: '长度在 4 到 10 个字符', trigger: 'blur' }
           ],
           teacherPassword: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "密码不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '密码不能为空', trigger: 'blur' },
+            { min: 8, max: 18, message: '长度在 8 到 18 个字符', trigger: 'blur' }
           ],
           teacherCreateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "创建时间不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 19, max: 20, message: '长度在 19 到 20 个字符', trigger: 'blur' }
           ],
           teacherUpdateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "修改时间不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 19, max: 20, message: '长度在 19 到 20 个字符', trigger: 'blur' }
           ],
           teacherPhone: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "手机号码不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '手机号码不能为空', trigger: 'blur' },
+            { min: 11, max: 12, message: '长度在 11 到 12 个字符', trigger: 'blur' }
           ]
 
         }

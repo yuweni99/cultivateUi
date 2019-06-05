@@ -48,28 +48,21 @@
         //表单校验
         rules: {
           username: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "用户名不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '用户名不能为空', trigger: 'blur' },
+            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           ],
           password: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "密码不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '密码不能为空', trigger: 'blur' },
+            { min: 8, max: 18, message: '长度在 8 到 18 个字符', trigger: 'blur' }
           ],
           secondaryPasswordConfirmation: [
-            {
-              validator: this.validatorPassword, trigger: 'blur'
-            }
+            { validator: this.validatorPassword, trigger: 'blur'},
+            { required: true, message: '二次确认密码不能为空', trigger: 'blur' },
+            { min: 8, max: 18, message: '长度在 8 到 18 个字符', trigger: 'blur' }
           ],
           phone: [
-            {
-              validator: this.checkPhoneNumber, trigger: 'blur'
-            }
+            {validator: this.checkPhoneNumber, trigger: 'blur'},
+            { required: true, message: '手机号码不能为空', trigger: 'blur' }
           ]
         }
       }
@@ -97,10 +90,7 @@
       },
       validatorPassword(rule, value, callback) {
 
-        if (!value) {
-          callback(new Error('二次确认密码不能为空'));
-          return
-        }
+
 
           if(value !== this.user.password){
             callback(new Error('两次密码输入不一致'));

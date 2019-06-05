@@ -5,17 +5,16 @@ import Register from '../pages/Register/Register'
 import NoResource from '../pages/NoResource/NoResource'
 import Home from '../pages/Home/Home'
 
-import TestProject from '../pages/TestManager/TestProject'
 import Course from '../pages/Course/Course'
-import AttendCourse from '../pages/AttendCourse/AttendCourse'
-import AttendCourseAlertnativeTime from '../pages/AttendcourseAlertnativeTime/AttendCourseAlertnativeTime'
+import Teaching from '../pages/Teaching/Teaching'
+import TeachingAlertnativeTime from '../pages/TeachingAlertnativeTime/TeachingAlertnativeTime'
 import AttendCourseInfo from '../pages/AttendCourseInfo/AttendCourseInfo'
-import AttendCourseTime from '../pages/AttendCourseTime/AttendCourseTime'
+import TeachingTime from '../pages/TeachingTime/TeachingTime'
 import Classroom from '../pages/Classroom/Classroom'
 import CourseTeacher from '../pages/CourseTeacher/CourseTeacher'
 import User from '../pages/User/User'
 import Teacher from '../pages/Teacher/Teacher'
-import StudentAttendcourse from "../pages/StudentAttendCourse/StudentAttendcourse";
+import StudentTeaching from "../pages/StudentTeaching/StudentTeaching";
 
 Vue.use(Router)
 
@@ -34,23 +33,18 @@ export default new Router({
       component: Home,
       children: [
         {
-          path: 'testProject',
-          component: TestProject,
-          name: '测试'
-        },
-        {
           path: 'course',
           component: Course,
           name: '课程信息'
         },
         {
-          path: 'attendCourse',
-          component: AttendCourse,
+          path: 'teaching',
+          component: Teaching,
           name: '课程管理'
         },
         {
-          path :'AttendCourseAlertNativeTime',
-          component: AttendCourseAlertnativeTime
+          path :'teachingAlertNativeTime',
+          component: TeachingAlertnativeTime
         },
         {
           path: 'attendCourseInfo',
@@ -58,8 +52,8 @@ export default new Router({
           name: '添加课程信息'
         },
         {
-          path: 'attendcourseTime',
-          component: AttendCourseTime,
+          path: 'teachingTime',
+          component: TeachingTime,
           name: '添加上课时间'
         },{
           path: 'classroom',
@@ -82,13 +76,13 @@ export default new Router({
           name: '教师信息'
         },
         {
-          path: 'studentAttendcourse',
-          component: StudentAttendcourse,
-          name: '学生添加课程'
+          path: 'studentteaching',
+          component: StudentTeaching,
+          name: '课程与课时'
         },
         {
           path: '',
-          redirect: 'attendCourse',
+          redirect: 'attendCourseInfo',
         }
       ]
     },

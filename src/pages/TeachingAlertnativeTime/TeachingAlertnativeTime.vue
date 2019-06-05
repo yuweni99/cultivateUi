@@ -14,36 +14,42 @@
     </div>
     <div>
       <el-table
-        :data="attendcourses"
+        :data="teachingAlertnativeTimes"
         border
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="attendcourseId"
+          prop="id"
           label="id">
         </el-table-column>
         <el-table-column
-          prop="attendcourseId"
+          prop="id"
           label="id">
         </el-table-column>
-
         <el-table-column
-          prop="attendcoursePrice"
-          label="课程价格">
+          prop="rank"
+          label="顺序">
         </el-table-column>
 
         <el-table-column
-          prop="attendcourseCourseId"
-          label="课程id">
+          prop="startTime"
+          label="开始时间">
         </el-table-column>
+
         <el-table-column
-          prop="attendCourseStatus"
-          label="课程状态">
+          prop="endTime"
+          label="结束时间">
         </el-table-column>
+
         <el-table-column
-          prop="attendCourseClassroomId"
-          label="教室id">
+          prop="createTime"
+          label="创建时间">
         </el-table-column>
+          <el-table-column
+            prop="updateTime"
+            label="修改时间">
+          </el-table-column>
+
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
@@ -67,24 +73,24 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" title="测试" :before-close="changeAddPageState">
-        <el-form status-icon :model="attendcourse" :rules="rules" ref="attendcourseForm" label-width="80px">
-          <el-form-item label="id" prop="attendcourseId">
-            <el-input v-model="attendcourse.attendcourseId"/>
+        <el-form status-icon :model="teachingAlertnativeTime" :rules="rules" ref="teachingAlertnativeTimeForm" label-width="80px">
+          <el-form-item label="id" prop="id">
+            <el-input v-model="teachingAlertnativeTime.id"/>
           </el-form-item>
-          <el-form-item label="课程价格" prop="attendcoursePrice">
-            <el-input v-model="attendcourse.attendcoursePrice"/>
+          <el-form-item label="开始时间" prop="startTime">
+            <el-input v-model="teachingAlertnativeTime.startTime"/>
           </el-form-item>
-          <el-form-item label="课程id" prop="attendcourseCourseId">
-            <el-input v-model="attendcourse.attendcourseCourseId"/>
+          <el-form-item label="结束时间" prop="endTime">
+            <el-input v-model="teachingAlertnativeTime.endTime"/>
           </el-form-item>
-          <el-form-item label="课程状态" prop="attendCourseStatus">
-            <el-input v-model="attendcourse.attendCourseStatus"/>
+          <el-form-item label="创建时间" prop="createTime">
+            <el-input v-model="teachingAlertnativeTime.createTime"/>
           </el-form-item>
-          <el-form-item label="教室id" prop="attendCourseClassroomId">
-            <el-input v-model="attendcourse.attendCourseClassroomId"/>
+          <el-form-item label="修改时间" prop="updateTime">
+            <el-input v-model="teachingAlertnativeTime.updateTime"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="addCourse">添加</el-button>
+            <el-button type="primary" @click="addTime">添加</el-button>
             <el-button @click="changeAddPageState">取消</el-button>
           </el-form-item>
         </el-form>
@@ -98,60 +104,49 @@
     data() {
       return {
           searchName:'',
-        attendcourse: {
-          attendcourseId:'',
-          attendcoursePrice: '',
-          attendcourseCourseId: '',
-          attendCourseStatus: '',
-          attendCourseClassroomId: ''
+        teachingAlertnativeTime: {
+          id:'',
+          startTime: '',
+          endTime: '',
+          rank: '',
+          createTime: '',
+          updateTime: ''
         },
         //用户选择的记录
-        attendcourseIds:[],
+        ids:[],
         dialogVisible: false,
-        attendcourses: [{
-          attendcourseId: 1,
-          attendcoursePrice: 100,
-          attendcourseCourseId: 1,
-          attendCourseStatus: '正在上课',
-          attendCourseClassroomId: 1001
+
+        teachingAlertnativeTimes: [{
+          id: 1,
+          startTime: '8:00',
+          endTime: '11:00',
+          rank: '',
+          createTime: '2017/01/01 08:00:00',
+          updateTime: '2017/02/01 08:00:00'
         }],
         message:'',
         rules:{
-          attendcourseId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+          id: [
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
-          attendcoursePrice: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程价格不能为空")
-              }, trigger: 'blur'
-            }
+          startTime: [
+            { required: true, message: '开始时间不能为空', trigger: 'blur' },
+            { min: 4, max: 8, message: '长度在 4 到 8 个字符', trigger: 'blur' }
           ],
-          attendcourseCourseId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程id不能为空")
-              }, trigger: 'blur'
-            }
+          endTime: [
+            { required: true, message: '结束时间不能为空', trigger: 'blur' },
+            { min: 4, max: 8, message: '长度在 4 到 8 个字符', trigger: 'blur' }
           ],
-          attendCourseStatus: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程状态不能为空")
-              }, trigger: 'blur'
-            }
+          createTime: [
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 19, max: 20, message: '长度在 19 到 20 个字符', trigger: 'blur' }
           ],
-          attendCourseClassroomId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "教室id不能为空")
-              }, trigger: 'blur'
-            }
-          ],
+          updateTime: [
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 19, max: 20, message: '长度在 19 到 20 个字符', trigger: 'blur' }
+          ]
+
         }
       }
     },
@@ -166,8 +161,8 @@
           callback();
         }
       },
-      addCourse(){
-        this.$refs.attendcourseForm.validate((valid) => {
+      addTime(){
+        this.$refs.teachingAlertnativeTimeForm.validate((valid) => {
           if (valid) {
             this.$message('登陆成功');
           } else {
@@ -188,14 +183,14 @@
         console.log(index, row);
       },
       handleSelectionChange(val) {
-        this.attendcourseIds = val.map((item) => item.attendcourseIds);
+        this.teachingAlertnativeTimes = val.map((item) => item.teachingAlertnativeTimes);
       },
       //删除选中的数据
       delSelect(){
         //校验
-        const {attendcourseIds} = this;
+        const {ids} = this;
 
-        if(!attendcourseIds.length){
+        if(!ids.length){
           this.$notify({
             title: '警告',
             message: '请选择要删除的数据',
@@ -213,7 +208,7 @@
             type: 'success',
             message: '删除成功!'
           });
-          console.log(this.attendcourseIds);
+          console.log(this.ids);
         });
 
       },
@@ -225,7 +220,7 @@
 
         //如果是关闭，则清空校验错误信息
         if(!this.dialogVisible){
-          this.$refs.attendcourseForm.resetFields();
+          this.$refs.teachingAlertnativeTimeForm.resetFields();
         }
 
       }

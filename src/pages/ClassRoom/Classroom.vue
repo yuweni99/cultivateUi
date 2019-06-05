@@ -73,6 +73,12 @@
           <el-form-item label="门牌号:" prop="name">
             <el-input v-model="classroom.name"/>
           </el-form-item>
+          <el-form-item label="创建时间:" prop="createTime">
+            <el-input v-model="classroom.createTime"/>
+          </el-form-item>
+          <el-form-item label="修改时间:" prop="updateTime">
+            <el-input v-model="classroom.updateTime"/>
+          </el-form-item>
           <el-form-item  label="状态">
               <el-radio :disabled="!isAdd" v-model="classroom.status" :label="0">可选</el-radio>
               <el-radio :disabled="!isAdd" v-model="classroom.status" :label="1">不可选</el-radio>
@@ -119,11 +125,16 @@
         message: '',
         rules: {
           name: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "门牌号不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '门牌号不能为空', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          ],
+          createTime: [
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
+          ],
+          updateTime: [
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ]
         }
       }

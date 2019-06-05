@@ -132,53 +132,32 @@
         message: '',
         rules: {
           id: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
-          ],
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
+        ],
           name: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程名称不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程名称不能为空', trigger: 'blur' },
+            { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
           ],
           description: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课程描述不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程描述不能为空', trigger: 'blur' },
+            { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
           ],
           teachingNum: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课时不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程课时不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
           ableSelectNum: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "可选人数不能为空或者为0")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程可选人数不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
           createTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "创建时间不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程创建时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ],
           updateTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "修改时间不能为空")
-              }, trigger: 'blur'
-            }
+            { required: true, message: '课程修改时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ],
         }
       }

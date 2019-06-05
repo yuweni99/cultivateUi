@@ -14,38 +14,25 @@
     </div>
     <div class="myclearfix">
       <el-table
-        :data="attendcourseTimes"
+        :data="studentAttendcourses"
         border
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="attendTimeId"
-          label="id">
+          prop="id">
         </el-table-column>
         <el-table-column
-          prop="attendTimeId"
+          prop="id"
           label="id">
         </el-table-column>
 
         <el-table-column
-          prop="attendTimeAttendCourseId"
-          label="该课时属于哪个课程">
+          prop="userId"
+          label="用户id">
         </el-table-column>
         <el-table-column
-          prop="attendTimeStart"
-          label="开始时间">
-        </el-table-column>
-        <el-table-column
-          prop="attendTimeEnd"
-          label="结束时间">
-        </el-table-column>
-        <el-table-column
-          prop="attendTimeStatus"
-          label="课时状态">
-        </el-table-column>
-        <el-table-column
-          prop="attendTimeJoinTime"
-          label="老师添加该课时的时间">
+          prop="teachingId"
+          label="添加课程id">
         </el-table-column>
 
         <el-table-column label="操作">
@@ -71,27 +58,32 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" title="测试" :before-close="handleClose">
-        <el-form status-icon ref="courseTimeForm" :model="attendcourseTime" :rules="rules" label-width="80px">
-          <el-form-item label="id" prop="attendTimeId">
-            <el-input v-model="attendcourseTime.attendTimeId"/>
+        <el-form ref="studentAttendcourseForm" :model="studentAttendcourse" :rules="rules" label-width="100px">
+          <el-form-item label="id" prop="id">
+            <el-input v-model="studentAttendcourse.id"/>
           </el-form-item>
-          <el-form-item label="课时所属课程" prop="attendTimeAttendCourseId">
-            <el-input v-model="attendcourseTime.attendTimeAttendCourseId"/>
+          <el-form-item label="用户id">
+            <el-select v-model="studentAttendcourse.userId" placeholder="请选择">
+              <el-option v-for="(user,index) in users" :key="index" :label="user.label" :value="user.value"/>
+            </el-select>
           </el-form-item>
-          <el-form-item label="开始时间" prop="attendTimeStart">
-            <el-input v-model="attendcourseTime.attendTimeStart"/>
+          <el-form-item label="课时id">
+            <!--            <el-input v-model="courseTeacher.teacherId"/>-->
+            <el-select v-model="studentAttendcourse.teachingId" placeholder="请选择">
+              <el-option label="弹b" value="1"></el-option>
+            </el-select>
           </el-form-item>
-          <el-form-item label="结束时间" prop="attendTimeEnd">
-            <el-input v-model="attendcourseTime.attendTimeEnd"/>
+          <el-form-item label="课时状态" prop="status">
+            <el-input v-model="studentAttendcourse.status"/>
           </el-form-item>
-          <el-form-item label="课时状态" prop="attendTimeStatus">
-            <el-input v-model="attendcourseTime.attendTimeStatus"/>
+          <el-form-item label="创建时间" prop="createTime">
+            <el-input v-model="studentAttendcourse.createTime"/>
           </el-form-item>
-          <el-form-item label="添加时间" prop="attendTimeJoinTime">
-            <el-input v-model="attendcourseTime.attendTimeJoinTime"/>
+          <el-form-item label="修改时间" prop="updateTime">
+            <el-input v-model="studentAttendcourse.updateTime"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="addCourseTime">添加</el-button>
+            <el-button type="primary" @click="addStudentAttendcourse">添加</el-button>
             <el-button @click="changeAddPageState">取消</el-button>
           </el-form-item>
         </el-form>
@@ -104,68 +96,54 @@
   export default {
     data() {
       return {
-        searchName:'',
-        attendcourseTime: {
-          attendTimeId:'',
-          attendTimeAttendCourseId: '',
-          attendTimeStart: '',
-          attendTimeEnd: '',
-          attendTimeStatus: '',
-          attendTimeJoinTime: ''
+        searchName: '', //课程名称
+        studentAttendcourse: {
+          id: '',
+          userId: '',
+          teachingId: '',
+          status: '',
+          createTime: '',
+          updateTime: ''
         },
-        attendcourseTimeIds: [],
+
         dialogVisible: false,
-        attendcourseTimes: [{
-          attendTimeId: 1,
-          attendTimeAttendCourseId: 1,
-          attendTimeStart: '2017/03/01',
-          attendTimeEnd: '2017/06/30',
-          attendTimeStatus: '取消',
-          attendTimeJoinTime: '2017/02/28'
+        studentAttendcourses: [{
+          id: 1,
+          userId: 1,
+          teachingId: 1,
+          status: '预约',
+          createTime: '2017/01/01',
+          updateTime: '2017/02/02'
         }],
+        users: [
+          {
+            value: 1,
+            label: '曹操',
+          },
+          {
+            value: 2,
+            label: '刘备',
+          }
+        ],
+        //用户选择的记录
+        ids: [],
         message:'',
         rules:{
-          attendTimeId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+          id: [
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
           ],
-          attendTimeAttendCourseId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课时所属课程不能为空")
-              }, trigger: 'blur'
-            }
+          status:[
+            { required: true, message: '课程状态不能为空', trigger: 'blur' },
+            { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
           ],
-          attendTimeStart: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "开始时间不能为空")
-              }, trigger: 'blur'
-            }
+          createTime: [
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ],
-          attendTimeEnd: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "结束时间不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          attendTimeStatus: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "课时状态不能为空")
-              }, trigger: 'blur'
-            }
-          ],
-          attendTimeJoinTime: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "添加时间不能为空")
-              }, trigger: 'blur'
-            }
+          updateTime: [
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ]
         }
       }
@@ -184,9 +162,9 @@
         console.log(index, row);
       },
       handleSelectionChange(val) {
-        this.attendcourseTimeIds = val.map((item) => item.attendcourseTimeIds);
+        this.ids = val.map((item) => item.ids);
       },
-      handleClose(){
+      handleClose() {
         this.dialogVisible = false;
       },
       //非空校验
@@ -197,8 +175,8 @@
           callback();
         }
       },
-      addCourseTime(){
-        this.$refs.courseTimeForm.validate((valid) => {
+      addStudentAttendcourse(){
+        this.$refs.studentAttendcourseForm.validate((valid) => {
           if (valid) {
             this.$message('登陆成功');
           } else {
@@ -215,7 +193,7 @@
 
         //如果是关闭，则清空校验错误信息
         if(!this.dialogVisible){
-          this.$refs.courseTimeForm.resetFields();
+          this.$refs.studentAttendcourseForm.resetFields();
         }
 
       },
@@ -223,9 +201,9 @@
       delSelect(){
 
         //校验
-        const {attendcourseTimeIds} = this;
+        const {ids} = this;
 
-        if(!attendcourseTimeIds.length){
+        if(!ids.length){
           this.$notify({
             title: '警告',
             message: '请选择要删除的数据',
@@ -243,7 +221,7 @@
             type: 'success',
             message: '删除成功!'
           });
-          console.log(this.attendcourseTimeIds);
+          console.log(this.ids);
         });
 
       }
@@ -260,21 +238,25 @@
   .page {
     margin: 0 35%
   }
+
   .searchInput {
     width: 200px;
   }
-  .functionRight{
+
+  .functionRight {
     display: inline-block;
     float: right;
   }
-  .myclearfix:after{/*伪元素是行内元素 正常浏览器清除浮动方法*/
+
+  .myclearfix:after { /*伪元素是行内元素 正常浏览器清除浮动方法*/
     content: "";
     display: block;
     height: 0;
-    clear:both;
+    clear: both;
     visibility: hidden;
   }
-  .myclearfix{
-    *zoom: 1;/*ie6清除浮动的方式 *号只有IE6-IE7执行，其他浏览器不执行*/
+
+  .myclearfix {
+    *zoom: 1; /*ie6清除浮动的方式 *号只有IE6-IE7执行，其他浏览器不执行*/
   }
 </style>

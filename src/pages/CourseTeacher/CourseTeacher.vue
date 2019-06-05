@@ -19,10 +19,10 @@
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="courseTeacherId">
+          prop="id">
         </el-table-column>
         <el-table-column
-          prop="courseTeacherId"
+          prop="id"
           label="课程教师id">
         </el-table-column>
 
@@ -59,8 +59,8 @@
     <div>
       <el-dialog :visible="dialogVisible" title="测试" :before-close="handleClose">
         <el-form ref="courseTeacherForm" :model="courseTeacher" :rules="rules" label-width="100px">
-          <el-form-item label="课程教师id" prop="courseTeacherId">
-            <el-input v-model="courseTeacher.courseTeacherId"/>
+          <el-form-item label="课程教师id" prop="id">
+            <el-input v-model="courseTeacher.id"/>
           </el-form-item>
           <el-form-item label="课程">
             <el-select v-model="courseTeacher.courseId" placeholder="请选择活动区域">
@@ -72,6 +72,12 @@
             <el-select v-model="courseTeacher.teacherId" placeholder="请选择活动区域">
               <el-option label="弹b" value="1"></el-option>
             </el-select>
+          </el-form-item>
+          <el-form-item label="创建时间" prop="createTime">
+            <el-input v-model="courseTeacher.createTime"/>
+          </el-form-item>
+          <el-form-item label="修改时间" prop="updateTime">
+            <el-input v-model="courseTeacher.updateTime"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="addCourseTeacher">添加</el-button>
@@ -89,15 +95,19 @@
       return {
         searchName: '', //课程名称
         courseTeacher: {
-          courseTeacherId: 9,
+          id: 9,
           courseId: 2,
-          teacherId: 1
+          teacherId: 1,
+          createTime: '2017/01/01',
+          updateTime: '2017/01/31'
         },
         dialogVisible: false,
         courseTeachers: [{
-          courseTeacherId: 9,
+          id: 9,
           courseId: 1,
-          teacherId: 1
+          teacherId: 1,
+          createTime: '2017/01/01',
+          updateTime: '2017/01/31'
         }],
         courses: [
           {
@@ -110,15 +120,20 @@
           }
         ],
         //用户选择的记录
-        courseTeacherIds: [],
+        ids: [],
         message:'',
         rules:{
-          courseTeacherId: [
-            {
-              validator: (rule, value, callback) => {
-                this.validator(rule, value, callback, "id不能为空")
-              }, trigger: 'blur'
-            }
+          id: [
+            { required: true, message: 'id不能为空', trigger: 'blur' },
+            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
+          ],
+          createTime: [
+            { required: true, message: '创建时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
+          ],
+          updateTime: [
+            { required: true, message: '修改时间不能为空', trigger: 'blur' },
+            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ]
         }
       }
@@ -137,7 +152,7 @@
         console.log(index, row);
       },
       handleSelectionChange(val) {
-        this.courseTeacherIds = val.map((item) => item.courseTeacherId);
+        this.ids = val.map((item) => item.id);
       },
       handleClose() {
         this.dialogVisible = false;
@@ -176,9 +191,9 @@
       delSelect(){
 
         //校验
-        const {courseTeacherIds} = this;
+        const {ids} = this;
 
-        if(!courseTeacherIds.length){
+        if(!ids.length){
           this.$notify({
             title: '警告',
             message: '请选择要删除的数据',
@@ -196,7 +211,7 @@
             type: 'success',
             message: '删除成功!'
           });
-          console.log(this.courseTeacherIds);
+          console.log(this.ids);
         });
 
       }
