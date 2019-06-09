@@ -1,8 +1,8 @@
 <template>
-  <div class="testProject">
+  <div>
     <div class="function">
       <el-input class="searchInput"
-                placeholder="课程名称/课程描述"
+                placeholder="用户名"
                 icon="search"
                 v-model="pageRequestParams.searchName">
       </el-input>
@@ -14,36 +14,28 @@
     </div>
     <div>
       <el-table
-        :data="courses"
+        :data="users"
         border
         v-loading="loading"
         @selection-change="handleSelectionChange">
         <el-table-column
-          type="selection"
-          prop="id">
+          type="selection">
         </el-table-column>
         <el-table-column
           prop="id"
           label="编号">
         </el-table-column>
-
         <el-table-column
           prop="name"
+          label="用户名">
+        </el-table-column>
+        <el-table-column
+          prop="phone"
+          label="手机号">
+        </el-table-column>
+        <el-table-column v-if="isShowCourseName"
+          prop="courseAlias"
           label="课程名称">
-        </el-table-column>
-        <el-table-column
-          prop="description"
-          label="课程描述">
-        </el-table-column>
-        <el-table-column
-          prop="teachingNum"
-          sortable
-          label="课程课时">
-        </el-table-column>
-        <el-table-column
-          prop="ableSelectNum"
-          sortable
-          label="剩余可选人数">
         </el-table-column>
         <el-table-column
           prop="createTime"
@@ -62,7 +54,7 @@
             <el-button
               size="mini"
               type="danger"
-              @click="delCourse(scope.row.id)">删除
+              @click="delUser(scope.row.id)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -79,18 +71,15 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form status-icon ref="courseForm" :model="course" :rules="rules" label-width="150px">
-          <el-form-item label="课程名称:" prop="name">
-            <el-input v-model="course.name"/>
+        <el-form status-icon ref="userForm" :model="user" :rules="rules" label-width="150px">
+          <el-form-item label="用户名称:" prop="name">
+            <el-input v-model="user.name"/>
           </el-form-item>
-          <el-form-item label="课程描述:" prop="description">
-            <el-input v-model="course.description"/>
+          <el-form-item label="密码:" prop="password">
+            <el-input type="text" v-model="user.password"/>
           </el-form-item>
-          <el-form-item label="课程课时:" prop="teachingNum">
-            <el-input type="number" v-model="course.teachingNum"/>
-          </el-form-item>
-          <el-form-item label="课程可选人数:" prop="ableSelectNum">
-            <el-input type="number" v-model="course.ableSelectNum"/>
+          <el-form-item label="手机号:" prop="phone">
+            <el-input v-model="user.phone"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="save">保存</el-button>
@@ -103,21 +92,34 @@
 </template>
 
 <script>
-
   import * as courseApi from '../../api/course'
+  import * as userApi from '../../api/user'
 
   export default {
+    props: {
+      type: Number //用户类型
+    },
+    computed: {
+      isShowCourseName(){
+        return this.type === 3;
+      }
+    },
     data() {
       return {
-        course: {
-          id: '',
+        isAdd: false, //表单操作类型
+        user: {
+          id:'',
           name: '',
-          description: '',
-          teachingNum: '',
-          ableSelectNum: '',
+          roleId: 0, //默认用户
+          courseId: '',
+          phone: '',
+          type: '', //用户类型别名
+          password: '',
           createTime: '',
-          updateTime: '',
+          updateTime: ''
         },
+        courseMaps: {}, //课程集合
+        users: [], //用户集合
         pageRequestParams: {
           pageSize: 5, //每页记录数默认为5
           pageNum: 1, //起始页
@@ -133,47 +135,48 @@
         title: '', //弹框层标题
         message: '',
         rules: {
-          id: [
-            { required: true, message: 'id不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-        ],
+
           name: [
-            { required: true, message: '课程名称不能为空', trigger: 'blur' },
-            { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+            { required: true, message: '课程名称不能为空', trigger: 'blur' }
           ],
-          description: [
-            { required: true, message: '课程描述不能为空', trigger: 'blur' },
-            { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+          password: [
+            { required: true, message: '密码不能为空', trigger: 'blur' },
           ],
-          teachingNum: [
-            { required: true, message: '课程课时不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-          ],
-          ableSelectNum: [
-            { required: true, message: '课程可选人数不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-          ],
-          createTime: [
-            { required: true, message: '课程创建时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
-          ],
-          updateTime: [
-            { required: true, message: '课程修改时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
-          ],
+          phone: { validator: this.validatorPhone, trigger: 'blur' },
+          type: [
+            { required: true, message: '用户类型', trigger: 'blur' }
+          ]
         }
       }
     },
     methods: {
+      validatorPhone(rule, value, callback){
+        if (value === '') {
+          callback(new Error('手机号不能为空'));
+          return;
+        }
+
+        //检验手机号是否合法
+        const reg = /^[1][3,4,5,7,8][0-9]{9}$/;
+
+        if(!reg.test(value)){
+          callback(new Error('手机号码不合法'));
+          return;
+        }
+
+        callback();
+
+
+      },
       // 表格内删除按钮点击实现
       async toEdit(id) {
         //打开弹出层页面
         this.openEditPage(false);
         //查询课程信息
-        const result = await courseApi.getCourse(id);
+        const result = await userApi.getUser(id);
         if(result.success){
           const {object} = result;
-          this.course = object;
+          this.user = object;
         }else{
           this.$message(result.message);
           //关闭弹出层界面
@@ -182,7 +185,7 @@
 
       },
       //删除
-      delCourse(id) {
+      delUser(id) {
         this.dels([id]);
       },
       handleSelectionChange(val) {
@@ -221,9 +224,8 @@
           type: 'warning'
         }).then(async () => {
 
-
           //发送请求删除数据
-          const result = await courseApi.delCourses(ids);
+          const result = await userApi.delUsers(ids);
 
           const type = result.success?'success':'info';
 
@@ -243,7 +245,8 @@
       },
 
       openEditPage(isAdd) { //type true为添加,false为修改
-        this.title = isAdd ? '添加课程信息' : '修改课程信息';
+        this.isAdd = isAdd;
+        this.title = isAdd ? '添加用户信息' : '修改用户信息';
         this.changeEditPageState();
       },
       //更改弹出层页面状态
@@ -254,8 +257,9 @@
         //如果是关闭，则清空校验错误信息
         if (!this.dialogVisible) {
           //清空表单数据校验信息
-          this.$refs.courseForm.resetFields();
-          this.course = {};
+          this.$refs.userForm.resetFields();
+          this.user = {};
+          this.user.roleId = 0;
         }
 
       },
@@ -275,13 +279,13 @@
         const {pageSize, pageNum, searchName} = this.pageRequestParams;
 
         //构建搜索过滤对象
-        const searchCourse = {searchName};
-        const result = await courseApi.getCoursePageQuery(pageNum, pageSize, searchCourse);
+        const searchUser = {searchName};
+        const result = await userApi.getUserPageQuery(pageNum, pageSize, searchUser);
 
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          this.courses = list; //数据
+          this.users = this.handleAlias(list); //数据
           this.pageData.total = total; //总记录数
 
           //关闭遮罩
@@ -291,22 +295,41 @@
           this.$message(result.message);
         }
       },
+      //处理别名
+      handleAlias(users){
+        const {type,courseMaps} = this; //用户类型
+
+        if(type !== 3){ //其他用户
+          return users;
+        }
+
+        //普通用户，处理课程别名信息
+        return users.map(u => {
+          const {courseId} = u;
+
+          if(courseId){
+            u.courseAlias = courseMaps[u.courseId].name;
+          }
+          return u;
+        })
+
+      },
       //保存数据
       save(){
 
         //校验表单
-        this.$refs.courseForm.validate(async (valid) => {
+        this.$refs.userForm.validate(async (valid) => {
           if (valid) {
 
-            const {course} = this;
-            const result = await courseApi.saveCourse(course);
+            const {user} = this;
+            const result = await userApi.saveUser(user);
 
             if(result.success){  //成功
 
               //讲修改后的新数据保存到课程集合中
-              const course = result.object; //新的课程信息
+              const user = result.object; //新的课程信息
 
-              this.saveCourse(course);
+              this.saveUser(user);
 
               this.$message({
                 message: '操作成功',
@@ -326,24 +349,39 @@
 
       },
       //保存或修改新课程信息
-      saveCourse(course){
+      saveUser(user){
 
         //获取课程集合
-        const {courses} = this;
+        const {users} = this;
 
         //根据id查询下标
-        const index = courses.findIndex((c) => c.id === course.id);
+        const index = users.findIndex((c) => c.id === user.id);
         if(index !==   -1){ //存在则为修改的数据
-          courses.splice(index,1,course);
+          users.splice(index,1,user);
         }else{ //添加的新数据
-          courses.splice(courses.length-1,1); //删除最后一个数据
-          courses.unshift(course); //头部添加一个新数据
+          users.splice(users.length-1,1); //删除最后一个数据
+          users.unshift(user); //头部添加一个新数据
         }
 
-        this.courses = courses;
+        this.users = users;
+      },
+      //查询所有的课程名称
+      async getCourses(){
+
+        const result = await courseApi.getCourses();
+
+        if(result.success){
+          this.courseMaps = result.object;
+        }
+
       }
     },
     mounted() {
+      const {type} = this; //用户类型
+
+      if(type === 3){ //如果是学生
+        this.getCourses();
+      }
 
       this.pageQuery();
     },

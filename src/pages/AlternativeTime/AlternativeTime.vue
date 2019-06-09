@@ -1,12 +1,12 @@
 <template>
   <div class="testProject">
     <div class="function">
-      <el-input class="searchInput"
+      <!--<el-input class="searchInput"
                 placeholder="课程名称/课程描述"
                 icon="search"
                 v-model="pageRequestParams.searchName">
       </el-input>
-      <el-button class="searchButton" @click="pageQuery">搜索</el-button>
+      <el-button class="searchButton" @click="pageQuery">搜索</el-button>-->
     </div>
     <div class="functionRight">
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
@@ -14,37 +14,38 @@
     </div>
     <div>
       <el-table
-        :data="courses"
+        :data="alternativeTimes"
         border
         v-loading="loading"
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
-          prop="id">
+          prop="id"
+          label="id">
         </el-table-column>
         <el-table-column
           prop="id"
           label="编号">
         </el-table-column>
+        <el-table-column
+          prop="rank"
+          label="顺序">
+        </el-table-column>
+        <el-table-column
+          prop="desc"
+          label="描述">
+        </el-table-column>
 
         <el-table-column
-          prop="name"
-          label="课程名称">
+          prop="startTime"
+          label="开始时间">
         </el-table-column>
+
         <el-table-column
-          prop="description"
-          label="课程描述">
+          prop="endTime"
+          label="结束时间">
         </el-table-column>
-        <el-table-column
-          prop="teachingNum"
-          sortable
-          label="课程课时">
-        </el-table-column>
-        <el-table-column
-          prop="ableSelectNum"
-          sortable
-          label="剩余可选人数">
-        </el-table-column>
+
         <el-table-column
           prop="createTime"
           label="创建时间">
@@ -79,18 +80,12 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form status-icon ref="courseForm" :model="course" :rules="rules" label-width="150px">
-          <el-form-item label="课程名称:" prop="name">
-            <el-input v-model="course.name"/>
+        <el-form status-icon ref="classForm" :model="alternativeTime" :rules="rules" label-width="150px">
+          <el-form-item label="开始时间" prop="startTime">
+            <el-input type="time" v-model="alternativeTime.startTime"/>
           </el-form-item>
-          <el-form-item label="课程描述:" prop="description">
-            <el-input v-model="course.description"/>
-          </el-form-item>
-          <el-form-item label="课程课时:" prop="teachingNum">
-            <el-input type="number" v-model="course.teachingNum"/>
-          </el-form-item>
-          <el-form-item label="课程可选人数:" prop="ableSelectNum">
-            <el-input type="number" v-model="course.ableSelectNum"/>
+          <el-form-item label="结束时间" prop="endTime">
+            <el-input type="time" v-model="alternativeTime.endTime"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="save">保存</el-button>
@@ -104,20 +99,21 @@
 
 <script>
 
-  import * as courseApi from '../../api/course'
+  import * as alternativeTimeApi from '../../api/alternativeTime'
 
   export default {
     data() {
       return {
-        course: {
-          id: '',
-          name: '',
-          description: '',
-          teachingNum: '',
-          ableSelectNum: '',
+        isAdd: false, //表单操作类型
+        alternativeTime: {
+          id:'',
+          startTime: '',
+          endTime: '',
+          rank: '',
           createTime: '',
-          updateTime: '',
+          updateTime: ''
         },
+        alternativeTimes: [],
         pageRequestParams: {
           pageSize: 5, //每页记录数默认为5
           pageNum: 1, //起始页
@@ -129,38 +125,17 @@
         loading: true, //遮罩效果
         ids: [],
         dialogVisible: false,
-        courses: [], //课程数组
+        classrooms: [], //教室集合
+
         title: '', //弹框层标题
         message: '',
         rules: {
-          id: [
-            { required: true, message: 'id不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-        ],
-          name: [
-            { required: true, message: '课程名称不能为空', trigger: 'blur' },
-            { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+          startTime: [
+            { required: true, message: '开始时间不能为空', trigger: 'blur' },
           ],
-          description: [
-            { required: true, message: '课程描述不能为空', trigger: 'blur' },
-            { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
-          ],
-          teachingNum: [
-            { required: true, message: '课程课时不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-          ],
-          ableSelectNum: [
-            { required: true, message: '课程可选人数不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-          ],
-          createTime: [
-            { required: true, message: '课程创建时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
-          ],
-          updateTime: [
-            { required: true, message: '课程修改时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
-          ],
+          endTime: [
+            { required: true, message: '结束时间不能为空', trigger: 'blur' },
+          ]
         }
       }
     },
@@ -170,10 +145,10 @@
         //打开弹出层页面
         this.openEditPage(false);
         //查询课程信息
-        const result = await courseApi.getCourse(id);
+        const result = await alternativeTimeApi.getAlternativeTime(id);
         if(result.success){
           const {object} = result;
-          this.course = object;
+          this.alternativeTime = object;
         }else{
           this.$message(result.message);
           //关闭弹出层界面
@@ -208,9 +183,7 @@
           });
           return;
         }
-
         this.dels(this.ids);
-
       },
       //删除课程集合调用方法
       dels(ids){
@@ -223,7 +196,7 @@
 
 
           //发送请求删除数据
-          const result = await courseApi.delCourses(ids);
+          const result = await alternativeTimeApi.delAlternativeTimes(ids);
 
           const type = result.success?'success':'info';
 
@@ -243,7 +216,8 @@
       },
 
       openEditPage(isAdd) { //type true为添加,false为修改
-        this.title = isAdd ? '添加课程信息' : '修改课程信息';
+        this.isAdd = isAdd;
+        this.title = isAdd ? '添加教室信息' : '修改教室信息';
         this.changeEditPageState();
       },
       //更改弹出层页面状态
@@ -254,8 +228,8 @@
         //如果是关闭，则清空校验错误信息
         if (!this.dialogVisible) {
           //清空表单数据校验信息
-          this.$refs.courseForm.resetFields();
-          this.course = {};
+          this.$refs.classForm.resetFields();
+          this.alternativeTime = {};
         }
 
       },
@@ -276,12 +250,12 @@
 
         //构建搜索过滤对象
         const searchCourse = {searchName};
-        const result = await courseApi.getCoursePageQuery(pageNum, pageSize, searchCourse);
+        const result = await alternativeTimeApi.getAlternativeTimePageQuery(pageNum, pageSize, searchCourse);
 
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          this.courses = list; //数据
+          this.alternativeTimes = this.handelAlias(list); //数据
           this.pageData.total = total; //总记录数
 
           //关闭遮罩
@@ -291,22 +265,31 @@
           this.$message(result.message);
         }
       },
+      //处理别名
+      handelAlias(alternativeTimes){
+
+        alternativeTimes.forEach(alternativeTime => {
+          const {rank} = alternativeTime;
+          alternativeTime.desc = `第${rank}节课`;
+        });
+
+        return alternativeTimes;
+      },
       //保存数据
       save(){
 
         //校验表单
-        this.$refs.courseForm.validate(async (valid) => {
+        this.$refs.classForm.validate(async (valid) => {
           if (valid) {
-
-            const {course} = this;
-            const result = await courseApi.saveCourse(course);
+            const {alternativeTime} = this;
+            const result = await alternativeTimeApi.saveAlternativeTime(alternativeTime);
 
             if(result.success){  //成功
 
               //讲修改后的新数据保存到课程集合中
-              const course = result.object; //新的课程信息
+              const alternativeTime = result.object; //新的课程信息
 
-              this.saveCourse(course);
+              this.saveAlternativeTime(alternativeTime);
 
               this.$message({
                 message: '操作成功',
@@ -325,22 +308,22 @@
 
 
       },
-      //保存或修改新课程信息
-      saveCourse(course){
+      //保存或修改上课时间信息
+      saveAlternativeTime(alternativeTime){
 
         //获取课程集合
-        const {courses} = this;
+        const {alternativeTimes} = this;
 
         //根据id查询下标
-        const index = courses.findIndex((c) => c.id === course.id);
+        const index = alternativeTimes.findIndex((c) => c.id === alternativeTime.id);
         if(index !==   -1){ //存在则为修改的数据
-          courses.splice(index,1,course);
+          alternativeTimes.splice(index,1,alternativeTime);
         }else{ //添加的新数据
-          courses.splice(courses.length-1,1); //删除最后一个数据
-          courses.unshift(course); //头部添加一个新数据
+          alternativeTimes.splice(alternativeTimes.length-1,1); //删除最后一个数据
+          alternativeTimes.unshift(alternativeTime); //头部添加一个新数据
         }
 
-        this.courses = courses;
+        this.alternativeTimes = alternativeTimes;
       }
     },
     mounted() {

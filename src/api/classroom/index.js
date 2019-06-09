@@ -14,3 +14,5 @@ export const getClassroom = id => ajax(`${BASE_URL}/classroom/${id}`,{},GET);
 export const saveClassroom = (classroom) => ajax(`${BASE_URL}/classroom/save`,classroom,POST);
 //删除教室信息
 export const delClassrooms = (ids) => ajax(`${BASE_URL}/classroom/dels`,ids,POST);
+//查询所有可用的教室
+export const getAbleuseClssromms = () => ajax(`${BASE_URL}/classroom/findAll`,{},GET);

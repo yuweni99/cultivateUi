@@ -11,6 +11,14 @@
     <el-form-item prop="password">
       <el-input type="password" v-model="user.password" placeholder="密码"  show-password></el-input>
     </el-form-item>
+    <el-form-item prop="code">
+      <el-input type="password" style="width: 180px;padding: 0 0" v-model="user.password" placeholder="验证码" >
+      </el-input>
+      <div style="width: 100px;height: 40px;line-height: 40px;display: inline-block;padding: 0px;position: absolute;margin-left: 25px">
+        <img style=""  :src="`${BASE_URL}/vrifyCode/defaultKaptcha`" alt="">
+      </div>
+
+    </el-form-item>
     <el-checkbox class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;margin-top:10px;">
       <el-button type="primary" @click="login" style="width:100%;">登录</el-button>
@@ -27,17 +35,19 @@
           username: '',
           password: '',
         },
+        BASE_URL: 'http://localhost:8080',
         showErrorMessage: false,
         message: '帐号admin或guest，密码123456，帐号权限不同!',
         //表单校验
         rules: {
           username: [
-            { required: true, message: '用户名不能为空', trigger: 'blur' },
-            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+            { required: true, message: '用户名不能为空', trigger: 'blur' }
           ],
           password: [
-            { required: true, message: '密码不能为空', trigger: 'blur' },
-            { min: 8, max: 18, message: '长度在 8 到 18 个字符', trigger: 'blur' }
+            { required: true, message: '密码不能为空', trigger: 'blur' }
+          ],
+          code: [
+            { required: true, message: '验证码不能为空', trigger: 'blur' }
           ]
         }
       }

@@ -7,16 +7,15 @@ import Home from '../pages/Home/Home'
 
 import Course from '../pages/Course/Course'
 import Teaching from '../pages/Teaching/Teaching'
-import TeachingAlertnativeTime from '../pages/TeachingAlertnativeTime/TeachingAlertnativeTime'
-import AttendCourseInfo from '../pages/AttendCourseInfo/AttendCourseInfo'
-import TeachingTime from '../pages/TeachingTime/TeachingTime'
+import AlternativeTime from '../pages/AlternativeTime/AlternativeTime'
 import Classroom from '../pages/Classroom/Classroom'
 import CourseTeacher from '../pages/CourseTeacher/CourseTeacher'
 import User from '../pages/User/User'
 import Teacher from '../pages/Teacher/Teacher'
 import StudentTeaching from "../pages/StudentTeaching/StudentTeaching";
+import Permission from '../pages/Permission/Permission'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [
@@ -40,22 +39,14 @@ export default new Router({
         {
           path: 'teaching',
           component: Teaching,
-          name: '课程管理'
+          name: '课时管理'
         },
         {
-          path :'teachingAlertNativeTime',
-          component: TeachingAlertnativeTime
+          path :'alternativeTime',
+          component: AlternativeTime,
+          NAME: '上课时间管理'
         },
         {
-          path: 'attendCourseInfo',
-          component: AttendCourseInfo,
-          name: '添加课程信息'
-        },
-        {
-          path: 'teachingTime',
-          component: TeachingTime,
-          name: '添加上课时间'
-        },{
           path: 'classroom',
           component: Classroom,
           name: '教室信息'
@@ -76,13 +67,18 @@ export default new Router({
           name: '教师信息'
         },
         {
-          path: 'studentteaching',
+          path: 'studentTeaching',
           component: StudentTeaching,
           name: '课程与课时'
         },
         {
+          path: 'permission',
+          component: Permission,
+          name: '许可管理'
+        },
+        {
           path: '',
-          redirect: 'attendCourseInfo',
+          redirect: 'user',
         }
       ]
     },
