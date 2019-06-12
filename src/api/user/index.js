@@ -9,14 +9,16 @@ export const getUserPageQuery = (pageNum,pageSize,searchUser) => ajax(`${BASE_UR
 
 //根据id查询课程信息
 export const getUser = id => ajax(`${BASE_URL}/user/${id}`,{},GET);
-//保存课程数据信息
-export const saveUser = (user) => ajax(`${BASE_URL}/user/save`,user,POST);
-//删除课程信息
-export const delUsers = (ids) => ajax(`${BASE_URL}/user/dels`,ids,POST);
 
+//注册用户
+export const registerUser = user => ajax(`${BASE_URL}/user/register`,user,POST);
+
+//发送验证码
+export const sendCode = phone => ajax(`${BASE_URL}/user/smsCode`,{phone},GET);
 
 //选择课程
-export const addCourse = (courseId) => ajax(`${BASE_URL}/user/addCourse`,courseId,GET);
+export const addCourse = courseId => ajax(`${BASE_URL}/user/addCourse`,courseId,GET);
 
 //查询用户对应的课程
 export const findCourse = () => ajax(`${BASE_URL}/user/findCourse`,{},GET);
+

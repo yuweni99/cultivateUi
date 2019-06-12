@@ -48,7 +48,6 @@
               type="danger"
               @click="findCurrentTeachingUser(scope.row.id,1)">查看同学
             </el-button>
-            <div v-if="scope.row.isExpice === '0'">
               <el-button
                 v-if="scope.row.status === '0' || scope.row.status === '3'"
                 size="mini"
@@ -61,7 +60,6 @@
                 type="danger"
                 @click="fixInAdvanceTeaching(scope.row.id,3)">取消预约
               </el-button>
-            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -97,8 +95,7 @@
             <el-input disabled type="date" v-model="studentTeachingInfo.teachingDate"/>
           </el-form-item>
           <el-form-item  label="上课时间">
-            <el-input disabled type="time"  v-model="studentTeachingInfo.startTime"/>
-            <el-input disabled type="time" v-model="studentTeachingInfo.endTime"/>
+            <el-input disabled :value="`${studentTeachingInfo.startTime}~${studentTeachingInfo.endTime}`"/>
           </el-form-item>
           <el-form-item  label="上课状态">
             <el-input disabled v-model="studentTeachingInfo.statusName"/>

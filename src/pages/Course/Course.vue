@@ -89,7 +89,7 @@
           <el-form-item label="课程课时:" prop="teachingNum">
             <el-input type="number" v-model="course.teachingNum"/>
           </el-form-item>
-          <el-form-item label="课程总人数:" prop="ableSelectNum">
+          <el-form-item label="课程总人数:" prop="totalPeople">
             <el-input type="number" v-model="course.totalPeople"/>
           </el-form-item>
           <el-form-item>
@@ -146,8 +146,8 @@
           teachingNum: [
             {required: true, message: '课程课时不能为空', trigger: 'blur'}
           ],
-          ableSelectNum: [
-            {required: true, message: '课程可选人数不能为空', trigger: 'blur'}
+          totalPeople: [
+            {required: true, message: '课程总人数不能为空', trigger: 'blur'}
           ],
           createTime: [
             {required: true, message: '课程创建时间不能为空', trigger: 'blur'}
