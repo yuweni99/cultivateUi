@@ -8,13 +8,7 @@
         <side-nav></side-nav>
       </div>
       <div class="app_right">
-        <div class="breadcrumb">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>{{pathName}}</el-breadcrumb-item>
-          </el-breadcrumb>
-        </div>
-        <router-view/>
+        <router-view replace/>
       </div>
     </div>
   </div>
@@ -34,6 +28,7 @@
         pathName: this.$route.name,
       }
     },
+
     components: {
       DataHeader,
       SideNav,

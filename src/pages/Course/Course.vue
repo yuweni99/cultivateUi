@@ -41,9 +41,9 @@
           label="课程课时">
         </el-table-column>
         <el-table-column
-          prop="ableSelectNum"
+          prop="totalPeople"
           sortable
-          label="剩余可选人数">
+          label="课程总人数">
         </el-table-column>
         <el-table-column
           prop="createTime"
@@ -79,7 +79,7 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form status-icon ref="courseForm" :model="course" :rules="rules" label-width="150px">
+        <el-form v-loading="!course.id && !isAdd" status-icon ref="courseForm" :model="course" :rules="rules" label-width="150px">
           <el-form-item label="课程名称:" prop="name">
             <el-input v-model="course.name"/>
           </el-form-item>
@@ -89,8 +89,8 @@
           <el-form-item label="课程课时:" prop="teachingNum">
             <el-input type="number" v-model="course.teachingNum"/>
           </el-form-item>
-          <el-form-item label="课程可选人数:" prop="ableSelectNum">
-            <el-input type="number" v-model="course.ableSelectNum"/>
+          <el-form-item label="课程总人数:" prop="ableSelectNum">
+            <el-input type="number" v-model="course.totalPeople"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="save">保存</el-button>
@@ -109,12 +109,13 @@
   export default {
     data() {
       return {
+        isAdd :false,
         course: {
           id: '',
           name: '',
           description: '',
           teachingNum: '',
-          ableSelectNum: '',
+          totalPeople: '',
           createTime: '',
           updateTime: '',
         },
@@ -134,32 +135,25 @@
         message: '',
         rules: {
           id: [
-            { required: true, message: 'id不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
-        ],
+            {required: true, message: 'id不能为空', trigger: 'blur'}
+          ],
           name: [
-            { required: true, message: '课程名称不能为空', trigger: 'blur' },
-            { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+            {required: true, message: '课程名称不能为空', trigger: 'blur'}
           ],
           description: [
-            { required: true, message: '课程描述不能为空', trigger: 'blur' },
-            { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+            {required: true, message: '课程描述不能为空', trigger: 'blur'}
           ],
           teachingNum: [
-            { required: true, message: '课程课时不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
+            {required: true, message: '课程课时不能为空', trigger: 'blur'}
           ],
           ableSelectNum: [
-            { required: true, message: '课程可选人数不能为空', trigger: 'blur' },
-            { min: 1, max: 3, message: '长度在 1 到 3 个字符', trigger: 'blur' }
+            {required: true, message: '课程可选人数不能为空', trigger: 'blur'}
           ],
           createTime: [
-            { required: true, message: '课程创建时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
+            {required: true, message: '课程创建时间不能为空', trigger: 'blur'}
           ],
           updateTime: [
-            { required: true, message: '课程修改时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
+            {required: true, message: '课程修改时间不能为空', trigger: 'blur'}
           ],
         }
       }
@@ -171,10 +165,10 @@
         this.openEditPage(false);
         //查询课程信息
         const result = await courseApi.getCourse(id);
-        if(result.success){
+        if (result.success) {
           const {object} = result;
           this.course = object;
-        }else{
+        } else {
           this.$message(result.message);
           //关闭弹出层界面
           this.changeEditPageState();
@@ -213,7 +207,7 @@
 
       },
       //删除课程集合调用方法
-      dels(ids){
+      dels(ids) {
 
         this.$confirm('请注意，删除的数据不可恢复!!!', '提示', {
           confirmButtonText: '确定',
@@ -225,10 +219,10 @@
           //发送请求删除数据
           const result = await courseApi.delCourses(ids);
 
-          const type = result.success?'success':'info';
+          const type = result.success ? 'success' : 'info';
 
-          const {success,message} = result;
-          if(success){ //删除成功
+          const {success, message} = result;
+          if (success) { //删除成功
             //刷新页面
             this.pageQuery();
           }
@@ -243,6 +237,7 @@
       },
 
       openEditPage(isAdd) { //type true为添加,false为修改
+        this.isAdd = isAdd;
         this.title = isAdd ? '添加课程信息' : '修改课程信息';
         this.changeEditPageState();
       },
@@ -283,7 +278,6 @@
           const {list, total} = result.queryResult;
           this.courses = list; //数据
           this.pageData.total = total; //总记录数
-
           //关闭遮罩
           this.loading = false;
 
@@ -292,7 +286,7 @@
         }
       },
       //保存数据
-      save(){
+      save() {
 
         //校验表单
         this.$refs.courseForm.validate(async (valid) => {
@@ -301,7 +295,7 @@
             const {course} = this;
             const result = await courseApi.saveCourse(course);
 
-            if(result.success){  //成功
+            if (result.success) {  //成功
 
               //讲修改后的新数据保存到课程集合中
               const course = result.object; //新的课程信息
@@ -314,7 +308,7 @@
               });
               //关闭弹出层
               this.changeEditPageState();
-            }else{ //失败
+            } else { //失败
               this.$message(result.message);
             }
 
@@ -326,17 +320,17 @@
 
       },
       //保存或修改新课程信息
-      saveCourse(course){
+      saveCourse(course) {
 
         //获取课程集合
         const {courses} = this;
 
         //根据id查询下标
         const index = courses.findIndex((c) => c.id === course.id);
-        if(index !==   -1){ //存在则为修改的数据
-          courses.splice(index,1,course);
-        }else{ //添加的新数据
-          courses.splice(courses.length-1,1); //删除最后一个数据
+        if (index !== -1) { //存在则为修改的数据
+          courses.splice(index, 1, course);
+        } else { //添加的新数据
+          courses.splice(courses.length - 1, 1); //删除最后一个数据
           courses.unshift(course); //头部添加一个新数据
         }
 

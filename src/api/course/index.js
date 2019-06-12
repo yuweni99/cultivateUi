@@ -14,5 +14,5 @@ export const saveCourse = (course) => ajax(`${BASE_URL}/course/save`,course,POST
 //删除课程信息
 export const delCourses = (ids) => ajax(`${BASE_URL}/course/dels`,ids,POST);
 //获取所有课程信息
-export const getCourses = () => ajax(`${BASE_URL}/course/findAll`,{},GET)
+export const getCourses = () => ajax(`${BASE_URL}/course/findAll`,{},GET);
 

@@ -2,7 +2,7 @@
   <div class="testProject">
     <div class="function">
       <el-input class="searchInput"
-                placeholder="请输入课程名称"
+                placeholder="课程名称/课时标题/课时描述"
                 icon="search"
                 v-model="pageRequestParams.searchName">
       </el-input>
@@ -22,25 +22,48 @@
         </el-table-column>
 
         <el-table-column
-          prop="userName"
-          label="用户名称">
+          prop="title"
+          label="课时标题">
         </el-table-column>
         <el-table-column
           prop="courseName"
           label="课程名称">
         </el-table-column>
         <el-table-column
-          prop="teachingTitle"
-          label="课时标题">
+          prop="statusName"
+          width="100"
+          label="课程状态">
         </el-table-column>
-        <el-table-column
-          prop="teachingDescription"
-          label="课时描述">
+        <el-table-column  label="操作">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="danger"
+              @click="toEdit(scope.row.id,3)">查看详情
+            </el-button>
+
+            <el-button
+              v-if="scope.row.status === '1'"
+              size="mini"
+              type="danger"
+              @click="findCurrentTeachingUser(scope.row.id,1)">查看同学
+            </el-button>
+            <div v-if="scope.row.isExpice === '0'">
+              <el-button
+                v-if="scope.row.status === '0' || scope.row.status === '3'"
+                size="mini"
+                type="danger"
+                @click="fixInAdvanceTeaching(scope.row.id,1)">预约
+              </el-button>
+              <el-button
+                v-if="scope.row.status === '1'"
+                size="mini"
+                type="danger"
+                @click="fixInAdvanceTeaching(scope.row.id,3)">取消预约
+              </el-button>
+            </div>
+          </template>
         </el-table-column>
-        <!--<el-table-column
-          prop="teachingId"
-          label="课时描述">
-        </el-table-column>-->
       </el-table>
       <el-pagination class="page"
                      @current-change="handleCurrentChange"
@@ -52,6 +75,40 @@
                      :total="pageData.total">
       </el-pagination>
     </div>
+    <div>
+      <el-dialog :visible="dialogVisible" title="查看课时详情" :before-close="changeEditPageState">
+        <el-form v-loading="!studentTeachingInfo.id" status-icon ref="teachingFrom" :model="studentTeachingInfo"  label-width="150px">
+          <el-form-item  label="课时名称">
+            <el-input disabled v-model="studentTeachingInfo.title"/>
+          </el-form-item>
+          <el-form-item  label="课时描述">
+            <el-input disabled v-model="studentTeachingInfo.description"/>
+          </el-form-item>
+          <el-form-item  label="课程名称">
+            <el-input disabled v-model="studentTeachingInfo.courseName"/>
+          </el-form-item>
+          <el-form-item  label="上课教师">
+            <el-input disabled v-model="studentTeachingInfo.teacherName"/>
+          </el-form-item>
+          <el-form-item  label="上课教室">
+            <el-input disabled v-model="studentTeachingInfo.classroomName"/>
+          </el-form-item>
+          <el-form-item  label="上课日期">
+            <el-input disabled type="date" v-model="studentTeachingInfo.teachingDate"/>
+          </el-form-item>
+          <el-form-item  label="上课时间">
+            <el-input disabled type="time"  v-model="studentTeachingInfo.startTime"/>
+            <el-input disabled type="time" v-model="studentTeachingInfo.endTime"/>
+          </el-form-item>
+          <el-form-item  label="上课状态">
+            <el-input disabled v-model="studentTeachingInfo.statusName"/>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="changeEditPageState">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -60,6 +117,7 @@
   export default {
     data() {
       return {
+        studentTeachingInfo: {}, //学生课程相关信息
         loading: true, //加载动画
         studentTeachings: [],
         dialogVisible: false,
@@ -96,7 +154,7 @@
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          this.studentTeachings = this.handelAlias(list); //数据
+          this.studentTeachings = list; //数据
           this.pageData.total = total; //总记录数
           //关闭遮罩
           this.loading = false;
@@ -105,8 +163,48 @@
           this.$message(result.message);
         }
       },
-      handelAlias(studentTeachings){
-        return studentTeachings;
+      //查看当前课时下的学生
+      findCurrentTeachingUser(){
+
+
+
+      },
+      //查看详细信息
+      async toEdit(id){
+        this.changeEditPageState();
+
+        //查询相关信息
+        const result = await studentTeachingApi.findBeInterrelated(id);
+
+        if(result.success){
+          this.studentTeachingInfo = result.object;
+        }else{
+          this.$message(result.message);
+        }
+      },
+      //预定课时
+      async fixInAdvanceTeaching(id,status){
+        const result = await studentTeachingApi.fixInAdvanceTeaching(id,status);
+
+        if(result.success){
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          });
+          //刷新页面
+          this.pageQuery();
+        }else{
+          this.$message(result.message);
+        }
+
+      },
+      changeEditPageState() {
+        const {dialogVisible} = this;
+        this.dialogVisible = !dialogVisible;
+        if (!this.dialogVisible) {
+          this.studentTeachingInfo = {}; //清空课时对象
+        }
+
       }
     },
     mounted() {
@@ -134,15 +232,4 @@
     float: right;
   }
 
-  .myclearfix:after { /*伪元素是行内元素 正常浏览器清除浮动方法*/
-    content: "";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
-  }
-
-  .myclearfix {
-    *zoom: 1; /*ie6清除浮动的方式 *号只有IE6-IE7执行，其他浏览器不执行*/
-  }
 </style>

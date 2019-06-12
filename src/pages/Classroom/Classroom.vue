@@ -32,7 +32,7 @@
           label="门牌号">
         </el-table-column>
         <el-table-column
-          prop="status"
+          prop="statusAlias"
           label="是否已用">
         </el-table-column>
         <el-table-column
@@ -69,7 +69,7 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form status-icon ref="classForm" :model="classroom" :rules="rules" label-width="150px">
+        <el-form v-loading="!classroom.id && !isAdd" status-icon ref="classForm" :model="classroom" :rules="rules" label-width="150px">
           <el-form-item label="门牌号:" prop="name">
             <el-input v-model="classroom.name"/>
           </el-form-item>
@@ -126,15 +126,12 @@
         rules: {
           name: [
             { required: true, message: '门牌号不能为空', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
           createTime: [
             { required: true, message: '创建时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ],
           updateTime: [
             { required: true, message: '修改时间不能为空', trigger: 'blur' },
-            { min: 18, max: 20, message: '长度在 18 到 20 个字符', trigger: 'blur' }
           ]
         }
       }
@@ -255,7 +252,7 @@
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          this.classrooms = list; //数据
+          this.classrooms = this.handleAlias(list); //数据
           this.pageData.total = total; //总记录数
 
           //关闭遮罩
@@ -264,6 +261,15 @@
         } else {
           this.$message(result.message);
         }
+      },
+      //处理别名
+      handleAlias(classrooms){
+        classrooms.forEach(c => {
+          c.statusAlias = c.status?'不可用': '可用';
+          return c;
+        })
+
+        return classrooms;
       },
       //保存数据
       save(){
@@ -307,7 +313,7 @@
 
         //根据id查询下标
         const index = classrooms.findIndex((c) => c.id === classroom.id);
-        if(index !==   -1){ //存在则为修改的数据
+        if(index !== -1){ //存在则为修改的数据
           classrooms.splice(index,1,classroom);
         }else{ //添加的新数据
           classrooms.splice(classrooms.length-1,1); //删除最后一个数据

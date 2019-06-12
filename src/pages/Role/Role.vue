@@ -1,12 +1,12 @@
 <template>
-  <div class="testProject">
+  <div>
     <div class="function">
-      <!--<el-input class="searchInput"
-                placeholder="课程名称/课程描述"
+      <el-input class="searchInput"
+                placeholder="用户名"
                 icon="search"
                 v-model="pageRequestParams.searchName">
       </el-input>
-      <el-button class="searchButton" @click="pageQuery">搜索</el-button>-->
+      <el-button class="searchButton" @click="pageQuery">搜索</el-button>
     </div>
     <div class="functionRight">
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
@@ -14,7 +14,7 @@
     </div>
     <div>
       <el-table
-        :data="alternativeTimes"
+        :data="roles"
         border
         v-loading="loading"
         @selection-change="handleSelectionChange">
@@ -28,34 +28,15 @@
           label="编号">
         </el-table-column>
         <el-table-column
-          prop="rank"
-          label="顺序">
-        </el-table-column>
-        <el-table-column
-          prop="desc"
-          label="描述">
-        </el-table-column>
-
-        <el-table-column
-          prop="startTime"
-          label="开始时间">
-        </el-table-column>
-
-        <el-table-column
-          prop="endTime"
-          label="结束时间">
-        </el-table-column>
-
-        <el-table-column
-          prop="createTime"
-          label="创建时间">
-        </el-table-column>
-        <el-table-column
-          prop="updateTime"
-          label="修改时间">
+          prop="name"
+          label="角色名称">
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="toPermissionPage(scope.row.id)">分配许可
+            </el-button>
             <el-button
               size="mini"
               @click="toEdit(scope.row.id)">编辑
@@ -63,7 +44,7 @@
             <el-button
               size="mini"
               type="danger"
-              @click="delCourse(scope.row.id)">删除
+              @click="delUser(scope.row.id)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -80,12 +61,9 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form v-loading="!alternativeTime.id && !isAdd" status-icon ref="classForm" :model="alternativeTime" :rules="rules" label-width="150px">
-          <el-form-item label="开始时间" prop="startTime">
-            <el-input type="time" v-model="alternativeTime.startTime"/>
-          </el-form-item>
-          <el-form-item label="结束时间" prop="endTime">
-            <el-input type="time" v-model="alternativeTime.endTime"/>
+        <el-form v-loading="!role.id && !isAdd" status-icon ref="teachingFrom" :model="role" :rules="rules" label-width="150px">
+          <el-form-item label="角色名称" prop="name">
+            <el-input  v-model="role.name"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="save">保存</el-button>
@@ -94,26 +72,36 @@
         </el-form>
       </el-dialog>
     </div>
+    <div>
+      <el-dialog :visible="isShowPermissionPage" :title="title" :before-close="changeEditPermissionPageState">
+        <Permission v-if="isShowPermissionPage" :roleId="roleId" :type="permissionType"/>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
 <script>
 
-  import * as alternativeTimeApi from '../../api/alternativeTime'
+
+  import * as roleApi from '../../api/role'
+
+  import Permission from '../../components/Permission/Permission'
 
   export default {
+    components: {
+      Permission
+    },
     data() {
       return {
+        isShowPermissionPage: false,//是否显示许可页面
+        permissionType: 2, //permission页面类型， 2表示分配许可
         isAdd: false, //表单操作类型
-        alternativeTime: {
-          id:'',
-          startTime: '',
-          endTime: '',
-          rank: '',
-          createTime: '',
-          updateTime: ''
+        role: {
+          id: '',
+          name: ''
         },
-        alternativeTimes: [],
+        roleId: '', //当前角色id
+        roles: [],
         pageRequestParams: {
           pageSize: 5, //每页记录数默认为5
           pageNum: 1, //起始页
@@ -125,30 +113,37 @@
         loading: true, //遮罩效果
         ids: [],
         dialogVisible: false,
-        classrooms: [], //教室集合
-
         title: '', //弹框层标题
         message: '',
-        rules: {
-          startTime: [
-            { required: true, message: '开始时间不能为空', trigger: 'blur' },
-          ],
-          endTime: [
-            { required: true, message: '结束时间不能为空', trigger: 'blur' },
+        rules:{
+          name: [
+            { required: true, message: '角色名称不能为空', trigger: 'blur' }
           ]
         }
       }
     },
     methods: {
+      //打开许可分配页面
+      toPermissionPage(roleId){
+
+        this.roleId = roleId;
+
+        this.changeEditPermissionPageState();
+      },
+      //改变许可页面状态
+      changeEditPermissionPageState(){
+        const isShowPermissionPage = !this.isShowPermissionPage;
+        this.isShowPermissionPage = isShowPermissionPage;
+      },
       // 表格内删除按钮点击实现
       async toEdit(id) {
         //打开弹出层页面
         this.openEditPage(false);
         //查询课程信息
-        const result = await alternativeTimeApi.getAlternativeTime(id);
+        const result = await roleApi.getRole(id);
         if(result.success){
           const {object} = result;
-          this.alternativeTime = object;
+          this.role = object;
         }else{
           this.$message(result.message);
           //关闭弹出层界面
@@ -157,7 +152,7 @@
 
       },
       //删除
-      delCourse(id) {
+      delUser(id) {
         this.dels([id]);
       },
       handleSelectionChange(val) {
@@ -183,7 +178,9 @@
           });
           return;
         }
+
         this.dels(this.ids);
+
       },
       //删除课程集合调用方法
       dels(ids){
@@ -194,9 +191,8 @@
           type: 'warning'
         }).then(async () => {
 
-
           //发送请求删除数据
-          const result = await alternativeTimeApi.delAlternativeTimes(ids);
+          const result = await roleApi.delRoles(ids);
 
           const type = result.success?'success':'info';
 
@@ -217,7 +213,7 @@
 
       openEditPage(isAdd) { //type true为添加,false为修改
         this.isAdd = isAdd;
-        this.title = isAdd ? '添加上课时间信息' : '修改上课时间信息';
+        this.title = isAdd ? '添加角色信息' : '修改角色信息';
         this.changeEditPageState();
       },
       //更改弹出层页面状态
@@ -228,8 +224,8 @@
         //如果是关闭，则清空校验错误信息
         if (!this.dialogVisible) {
           //清空表单数据校验信息
-          this.$refs.classForm.resetFields();
-          this.alternativeTime = {};
+          this.$refs.teachingFrom.resetFields();
+          this.role = {}; //清空课时对象
         }
 
       },
@@ -249,13 +245,13 @@
         const {pageSize, pageNum, searchName} = this.pageRequestParams;
 
         //构建搜索过滤对象
-        const searchCourse = {searchName};
-        const result = await alternativeTimeApi.getAlternativeTimePageQuery(pageNum, pageSize, searchCourse);
+        const searchUser = {searchName};
+        const result = await roleApi.getRolePageQuery(pageNum, pageSize, searchUser);
 
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          this.alternativeTimes = this.handelAlias(list); //数据
+          this.roles = list;
           this.pageData.total = total; //总记录数
 
           //关闭遮罩
@@ -265,31 +261,22 @@
           this.$message(result.message);
         }
       },
-      //处理别名
-      handelAlias(alternativeTimes){
-
-        alternativeTimes.forEach(alternativeTime => {
-          const {rank} = alternativeTime;
-          alternativeTime.desc = `第${rank}节课`;
-        });
-
-        return alternativeTimes;
-      },
       //保存数据
       save(){
 
         //校验表单
-        this.$refs.classForm.validate(async (valid) => {
+        this.$refs.teachingFrom.validate(async (valid) => {
           if (valid) {
-            const {alternativeTime} = this;
-            const result = await alternativeTimeApi.saveAlternativeTime(alternativeTime);
+
+            const {role} = this;
+            const result = await roleApi.saveRole(role);
 
             if(result.success){  //成功
 
               //讲修改后的新数据保存到课程集合中
-              const alternativeTime = result.object; //新的课程信息
+              const role = result.object; //新的课程信息
 
-              this.saveAlternativeTime(alternativeTime);
+              this.saveRole(role);
 
               this.$message({
                 message: '操作成功',
@@ -308,28 +295,27 @@
 
 
       },
-      //保存或修改上课时间信息
-      saveAlternativeTime(alternativeTime){
-
+      //保存或修改新课程信息
+      saveRole(role){
         //获取课程集合
-        const {alternativeTimes} = this;
-        //处理别名
-        alternativeTime.desc = `第${alternativeTime.rank}节课`;
+        const {roles} = this;
 
         //根据id查询下标
-        const index = alternativeTimes.findIndex((c) => c.id === alternativeTime.id);
+        const index = roles.findIndex((c) => c.id === role.id);
         if(index !==   -1){ //存在则为修改的数据
-          alternativeTimes.splice(index,1,alternativeTime);
+          roles.splice(index,1,role);
         }else{ //添加的新数据
-          alternativeTimes.splice(alternativeTimes.length-1,1); //删除最后一个数据
-          alternativeTimes.unshift(alternativeTime); //头部添加一个新数据
+          if(roles.length === 5){
+            roles.splice(roles.length-1,1); //删除最后一个数据
+          }
+
+          roles.unshift(role); //头部添加一个新数据
         }
 
-        this.alternativeTimes = alternativeTimes;
-      }
+        this.roles = roles;
+      },
     },
     mounted() {
-
       this.pageQuery();
     },
   }

@@ -10,19 +10,12 @@
     </div>
     <div class="functionRight">
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
-      <el-button type="primary" @click="delSelect">删除选中</el-button>
     </div>
     <div>
       <el-table
         :data="teachings"
         border
-        v-loading="loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column
-          type="selection"
-          prop="id"
-          label="id">
-        </el-table-column>
+        v-loading="loading">
         <el-table-column
           prop="id"
           label="id">
@@ -34,35 +27,41 @@
         </el-table-column>
 
         <el-table-column
-          prop="courseAlias"
+          prop="courseName"
           label="课程名称">
         </el-table-column>
         <el-table-column
-          prop="statusAlias"
+          prop="statusName"
           label="课程状态">
         </el-table-column>
         <el-table-column
-          prop="classroomAlias"
+          prop="description"
+          label="课时描述">
+        </el-table-column>
+        <el-table-column
+          prop="courseNum"
+          label="课时顺序">
+        </el-table-column>
+        <el-table-column
+          prop="classroomName"
           label="教室名称">
         </el-table-column>
         <el-table-column
           prop="createTime"
           label="创建时间">
         </el-table-column>
-        <el-table-column
-          prop="updateTime"
-          label="修改时间">
-        </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column  label="操作">
           <template slot-scope="scope">
             <el-button
+              v-if="scope.row.status === 0"
               size="mini"
               @click="toEdit(scope.row.id)">编辑
             </el-button>
             <el-button
+              v-if="scope.row.status === 0"
               size="mini"
               type="danger"
-              @click="delUser(scope.row.id)">删除
+              @click="del(scope.row.id)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -83,18 +82,28 @@
           <el-form-item label="课时价格" prop="price">
             <el-input type="number" min="0" v-model="teaching.price"/>
           </el-form-item>
-          <el-form-item label="课程名称" prop="courseId">
-            <el-select v-model="teaching.courseId" placeholder="请选择课程">
+          <el-form-item label="课程名称" prop="courseTeacherId">
+            <el-select v-model="teaching.courseTeacherId" placeholder="请选择课程">
               <el-option v-for="(course,index) in courseMaps" :key="index" :label="course.name" :value="course.id"/>
             </el-select>
           </el-form-item>
-          <el-form-item  label="课时状态">
-            <el-radio :disabled="!isAdd" v-model="teaching.status" :label="0">未上</el-radio>
-            <el-radio :disabled="!isAdd" v-model="teaching.status" :label="1">已上</el-radio>
+          <el-form-item  label="课时描述" prop="description">
+            <el-input  v-model="teaching.description"/>
+          </el-form-item>
+          <el-form-item  label="课时标题" prop="title">
+            <el-input  v-model="teaching.title"/>
           </el-form-item>
           <el-form-item label="教室" prop="classroomId">
             <el-select v-model="teaching.classroomId" placeholder="请选择课程">
               <el-option v-for="(classroom,index) in classroomMaps" :key="index" :label="classroom.name" :value="classroom.id"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item  label="上课日期" prop="teachingDate">
+            <el-input type="date" v-model="teaching.teachingDate"/>
+          </el-form-item>
+          <el-form-item label="上课时间" prop="altTimeId">
+            <el-select v-model="teaching.altTimeId" placeholder="请选择上课时间">
+              <el-option v-for="(altTime,index) in altTimes" :key="index" :label="`${altTime.startTime}-${altTime.endTime}`" :value="altTime.id"/>
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -110,7 +119,8 @@
 <script>
 
   import * as teachingApi from '../../api/teaching'
-  import * as courseApi from '../../api/course'
+  import * as altTimeApi from '../../api/altTime'
+  import * as courseTeacherApi from '../../api/courseTeacher'
   import * as classroomApi from '../../api/classroom'
 
   export default {
@@ -120,14 +130,17 @@
         teaching: {
           id:'',
           price: '',
-          courseId: '',
+          courseTeacherId: '', //课程id
           status: 0, //默认为未上
+          altTimeId: '',//上课时间
           classroomId: '',
           createTime: '',
-          updateTime: ''
+          updateTime: '',
+          teachingDate: ''//上课日期
         },
         courseMaps: {}, //课程对象map
         classroomMaps: {}, //教室对象map
+        altTimes: [], //上课时间集合
         teachings: [], //课时集合
         users: [], //用户集合
         pageRequestParams: {
@@ -147,14 +160,26 @@
           price: [
             { required: true, message: '课程价格不能为空', trigger: 'blur' }
           ],
-          courseId: [
+          description: [
+            { required: true, message: '课时描述不能为空', trigger: 'blur' }
+          ],
+          courseTeacherId: [
             { required: true, message: '课程不能为空', trigger: 'blur' }
+          ],
+          title: [
+            { required: true, message: '课时标题不能为空', trigger: 'blur' }
           ],
           status: [
             { required: true, message: '课程状态不能为空', trigger: 'blur' }
           ],
           classroomId: [
             { required: true, message: '教室不能为空', trigger: 'blur' }
+          ],
+          altTimeId: [
+            { required: true, message: '上课时间不能为空', trigger: 'blur' }
+          ],
+          teachingDate: [
+            { required: true, message: '上课日期不能为空', trigger: 'blur' }
           ]
         }
       }
@@ -180,9 +205,6 @@
       delUser(id) {
         this.dels([id]);
       },
-      handleSelectionChange(val) {
-        this.ids = val.map((item) => item.id);
-      },
       //非空校验
       validator(rule, value, callback, message) {
         if (!value) {
@@ -192,23 +214,9 @@
         }
       },
       //删除选中的数据
-      delSelect() {
-        //校验
-        const {ids} = this;
-        if (!ids.length) {
-          this.$notify({
-            title: '警告',
-            message: '请选择要删除的数据',
-            type: 'warning'
-          });
-          return;
-        }
 
-        this.dels(this.ids);
-
-      },
       //删除课程集合调用方法
-      dels(ids){
+      del(id){
 
         this.$confirm('请注意，删除的数据不可恢复!!!', '提示', {
           confirmButtonText: '确定',
@@ -217,7 +225,7 @@
         }).then(async () => {
 
           //发送请求删除数据
-          const result = await teachingApi.delTeachings(ids);
+          const result = await teachingApi.delTeaching(id);
 
           const type = result.success?'success':'info';
 
@@ -277,25 +285,13 @@
         if (result.success) {
           //获取课程集合
           const {list, total} = result.queryResult;
-          console.log(new Date());
-          this.teachings = list.map(t => this.handleAlias(t));
-          console.log(new Date());
+          this.teachings = list;
           this.pageData.total = total; //总记录数
-
           //关闭遮罩
           this.loading = false;
-
         } else {
           this.$message(result.message);
         }
-      },
-      //处理别名数据
-      handleAlias(teaching){
-        const {courseMaps,classroomMaps} = this;
-        teaching.statusAlias = teaching.status?'已上':'未上'; //添加状态别名
-        teaching.courseAlias = courseMaps[teaching.courseId].name; //课程别名
-        teaching.classroomAlias = classroomMaps[teaching.classroomId].name; //教室别名
-        return teaching;
       },
       //保存数据
       save(){
@@ -312,14 +308,14 @@
               //讲修改后的新数据保存到课程集合中
               const teaching = result.object; //新的课程信息
 
-              this.saveTeaching(teaching);
-
               this.$message({
                 message: '操作成功',
                 type: 'success'
               });
               //关闭弹出层
               this.changeEditPageState();
+
+              this.pageQuery();
             }else{ //失败
               this.$message(result.message);
             }
@@ -331,31 +327,9 @@
 
 
       },
-      //保存或修改新课程信息
-      saveTeaching(teaching){
-
-        //处理别名
-        this.handleAlias(teaching);
-        //获取课程集合
-        const {teachings} = this;
-
-        //根据id查询下标
-        const index = teachings.findIndex((c) => c.id === teaching.id);
-        if(index !==   -1){ //存在则为修改的数据
-          teachings.splice(index,1,teaching);
-        }else{ //添加的新数据
-          if(teachings.length === 5){
-            teachings.splice(teachings.length-1,1); //删除最后一个数据
-          }
-
-          teachings.unshift(teaching); //头部添加一个新数据
-        }
-
-        this.teachings = teachings;
-      },
       //查询课程集合
       async getCourses(){
-        const result = await courseApi.getCourses();
+        const result = await courseTeacherApi.getCourses();
         if(result.success){
           this.courseMaps = result.object;
         }
@@ -366,13 +340,21 @@
         if(result.success){
           this.classroomMaps = result.object;
         }
+      },
+      //查询所有上课时间
+      async getAltTimes(){
+        const result = await altTimeApi.getAltTimes();
+        if(result.success){
+          this.altTimes = result.object;
+        }
       }
-
     },
     mounted() {
-      this.getCourses();
+      this.getAltTimes();
       this.getAbleuseClssromms();
       this.pageQuery();
+      this.getCourses();
+
     },
   }
 </script>

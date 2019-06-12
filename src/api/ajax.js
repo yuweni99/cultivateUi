@@ -25,7 +25,7 @@ export default function ajax(url,data,method = GET) {
         break;
       }
       case DELETE:{
-        promise = sendDeleteReq(data,url);
+        promise = sendDeleteReq(url);
         break;
       }
     }
@@ -68,8 +68,8 @@ const sendPostReq = (data,url) => {
 };
 
 //发送delete请求
-const sendDeleteReq = (data,url) => {
-  return axios.delete(url,data);
+const sendDeleteReq = (url) => {
+  return axios.delete(url);
 };
 
 //发送put请求

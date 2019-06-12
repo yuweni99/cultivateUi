@@ -28,11 +28,16 @@
           prop="teacherName"
           label="教师名称">
         </el-table-column>
+        <el-table-column
+          prop="ableSelectNum"
+          sortable
+          label="可选人数">
+        </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
               size="mini"
-              @click="selectCourse(scope.$index, scope.row)">选择课程
+              @click="addCourse(scope.row.id)">选择课程
             </el-button>
           </template>
         </el-table-column>
@@ -51,7 +56,8 @@
 </template>
 
 <script>
-  import * as courseTeacher from '../../api/courseTeacher'
+  import * as courseTeacherApi from '../../api/courseTeacher'
+  import * as userApi from '../../api/user'
   export default {
     data() {
       return {
@@ -69,6 +75,24 @@
       }
     },
     methods: {
+      async addCourse(courseTeacherId){
+
+        const result = await userApi.addCourse({courseTeacherId});
+
+        if(result.success){
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          });
+
+          //todo 这里需要改变课程状态
+
+
+        }else{
+          this.$message(result.message);
+        }
+
+      },
       //更改页码触发
       handleCurrentChange(val) {
         this.pageRequestParams.pageNum = val;
@@ -85,7 +109,7 @@
         const {pageSize, pageNum, searchName} = this.pageRequestParams;
         //构建搜索过滤对象
         const searchCourse = {searchName};
-        const result = await courseTeacher.getCourseTeacherPageQuery(pageNum, pageSize, searchCourse);
+        const result = await courseTeacherApi.getCourseTeacherPageQuery(pageNum, pageSize, searchCourse);
 
         if (result.success) {
           //获取课程集合
@@ -99,10 +123,7 @@
           this.$message(result.message);
         }
       },
-      //选择课程
-      selectCourse(){
-        this.$message("选择课程成功")
-      }
+
     },
     mounted() {
       this.pageQuery();

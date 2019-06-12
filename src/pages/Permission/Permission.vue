@@ -1,15 +1,20 @@
 <template>
-    <div>
-      许可管理
-    </div>
+  <Permission :type="type"/>
 </template>
 
 <script>
-    export default {
-        name: "Permission"
+  import Permission from '../../components/Permission/Permission'
+  export default{
+    data(){
+      return {
+        type: 1 //许可管理
+      }
+    },
+    components: {
+      Permission
     }
+  }
 </script>
 
 <style>
-
 </style>

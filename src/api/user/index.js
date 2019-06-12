@@ -15,3 +15,8 @@ export const saveUser = (user) => ajax(`${BASE_URL}/user/save`,user,POST);
 export const delUsers = (ids) => ajax(`${BASE_URL}/user/dels`,ids,POST);
 
 
+//选择课程
+export const addCourse = (courseId) => ajax(`${BASE_URL}/user/addCourse`,courseId,GET);
+
+//查询用户对应的课程
+export const findCourse = () => ajax(`${BASE_URL}/user/findCourse`,{},GET);
