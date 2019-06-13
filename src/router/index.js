@@ -15,7 +15,9 @@ import Teacher from '../pages/Teacher/Teacher'
 import StudentTeaching from "../pages/StudentTeaching/StudentTeaching";
 import Permission from '../pages/Permission/Permission'
 import Role from '../pages/Role/Role'
-import UserCourseTeacher from '../pages/UserCourseTeacher/UserCourseTeacher.vue'
+import UserCourse from '../pages/UserCourse/UserCourse'
+import TeacherCourse from '../pages/TeacherCourse/TeacherCourse'
+
 
 Vue.use(Router);
 
@@ -74,8 +76,12 @@ export default new Router({
           component: Role,
         },
         {
-          path: 'userCourseTeacher',
-          component: UserCourseTeacher,
+          path: 'userCourse',
+          component: UserCourse,
+        },
+        {
+          path: 'teacherCourse',
+          component: TeacherCourse,
         },
         {
           path: '',

@@ -19,7 +19,8 @@
           <el-menu-item index="/home/course">课程管理</el-menu-item>
           <el-menu-item index="/home/course">课程列表</el-menu-item>
           <el-menu-item index="/home/courseTeacher">课程列表</el-menu-item>
-          <el-menu-item index="/home/userCourseTeacher">我的课程</el-menu-item>
+          <el-menu-item index="/home/userCourse">学生课程</el-menu-item>
+          <el-menu-item index="/home/teacherCourse">老师课程</el-menu-item>
           <el-menu-item index="/home/studentTeaching">我的课时</el-menu-item>
         </el-menu-item-group>
       </el-submenu>

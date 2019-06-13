@@ -14,11 +14,7 @@
       <el-table
         :data="users"
         border
-        v-loading="loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column
-          type="selection">
-        </el-table-column>
+        v-loading="loading">
         <el-table-column
           prop="id"
           label="编号">
@@ -34,10 +30,6 @@
         <el-table-column v-if="isShowCourseName"
                          prop="courseName"
                          label="课程名称">
-        </el-table-column>
-        <el-table-column
-          prop="createTime"
-          label="创建时间">
         </el-table-column>
       </el-table>
       <el-pagination class="page"
@@ -58,12 +50,7 @@
 
   export default {
     props: {
-      type: Number //用户类型
-    },
-    computed: {
-      isShowCourseName() {
-        return this.type === 3;
-      }
+      ctId: Number,
     },
     data() {
       return {
@@ -87,10 +74,9 @@
       async pageQuery() {
 
         const {pageSize, pageNum, searchName} = this.pageRequestParams;
-        const userType = this.type;
         //构建搜索过滤对象
-        const searchUser = {searchName,userType};
-        const result = await userApi.getUserPageQuery(pageNum, pageSize, searchUser);
+        const searchUser = {searchName};
+        const result = await userApi.pageQueryTeacherCourse(pageNum, pageSize,this.ctId, searchUser);
 
         if (result.success) {
           //获取课程集合

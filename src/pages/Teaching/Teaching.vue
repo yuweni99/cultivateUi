@@ -329,7 +329,7 @@
       },
       //查询课程集合
       async getCourses(){
-        const result = await courseTeacherApi.getCourses();
+        const result = await courseTeacherApi.findTeacherCourse();
         if(result.success){
           this.courseMaps = result.object;
         }

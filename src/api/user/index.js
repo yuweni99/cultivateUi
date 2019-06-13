@@ -5,9 +5,14 @@ import ajax from '../ajax'
 import {DELETE,GET,POST,PUT} from '../requestTypes'
 const BASE_URL = 'http://localhost:8080';
 // 分页过滤查询课程信息
-export const getUserPageQuery = (pageNum,pageSize,searchUser) => ajax(`${BASE_URL}/user/pageQuery/${pageNum}/${pageSize}`,searchUser,POST);
+export const pageQueryUser = (pageNum,pageSize,searchUser) => ajax(`${BASE_URL}/user/pageQueryUser/${pageNum}/${pageSize}`,searchUser,POST);
+export const pageQueryTeacher = (pageNum,pageSize,searchUser) => ajax(`${BASE_URL}/user/pageQueryTeacher/${pageNum}/${pageSize}`,searchUser,POST);
 
-//根据id查询课程信息
+//根据课程id查询用户列表
+export const pageQueryTeacherCourse = (pageNum,pageSize,ctId,searchUser) => ajax(`${BASE_URL}/user/pageQueryTeacherCourse/${pageNum}/${pageSize}/${ctId}`,searchUser,POST);
+
+
+
 export const getUser = id => ajax(`${BASE_URL}/user/${id}`,{},GET);
 
 //注册用户

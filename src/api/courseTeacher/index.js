@@ -9,4 +9,6 @@ const BASE_URL = 'http://localhost:8080';
 export const getCourseTeacherPageQuery = (pageNum,pageSize,searchStudentTeaching) => ajax(`${BASE_URL}/courseTeacher/pageQuery/${pageNum}/${pageSize}`,searchStudentTeaching,POST);
 
 //查询教师对应的课程
-export const getCourses = () => ajax(`${BASE_URL}/courseTeacher/findAll`,{},GET);
+export const findTeacherCourse = () => ajax(`${BASE_URL}/courseTeacher/findTeacherCourse`,{},GET);
+//分页查询教师对应课程
+export const getPageQueryTeacherCourse = (pageNum,pageSize,searchStudentTeaching) => ajax(`${BASE_URL}/courseTeacher/pageQueryTeacherCourse/${pageNum}/${pageSize}`,searchStudentTeaching,POST);
