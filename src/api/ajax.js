@@ -1,5 +1,7 @@
 import axios from 'axios'
 import {DELETE,GET,POST,PUT} from './requestTypes'
+
+import store from '../store'
 //携带cookie
 axios.defaults.withCredentials = true;
 
@@ -7,6 +9,13 @@ axios.defaults.withCredentials = true;
 export default function ajax(url,data,method = GET) {
 
   return new Promise((resolve,reject) =>{
+
+    const token = store.state.token;
+
+    if(token){
+      //携带请求头
+      axios.defaults.headers.common['authorization'] = `Basic ${token}`;
+    }
 
 
     let promise;

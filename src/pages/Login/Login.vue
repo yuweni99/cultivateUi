@@ -26,7 +26,11 @@
 </template>
 
 <script>
-  const BASE_URL = 'http://localhost:8080';
+
+  import * as userApi from '../../api/user'
+
+  const BASE_URL = 'http://localhost:8888/auth';
+
   export default {
     name: 'Login',
     data() {
@@ -73,9 +77,28 @@
       },
       //登陆处理
       login(){
-        this.$refs.userFrom.validate((valid) => {
+        this.$refs.userFrom.validate(async (valid) => {
           if (valid) {
-            this.$message('登陆成功');
+
+            const user = this.user;
+
+            const result = await userApi.login(user);
+
+            if(result.success){
+              console.log(result.object);
+
+              //获取token
+              const token = result.object;
+              //保存到vuex中
+              this.$store.dispatch("saveToken",token)
+
+              //跳转首页
+              this.$router.replace("/home")
+
+            }else{
+              this.$message(result.message);
+            }
+
           } else {
             console.log('error submit!!');
             return false;
