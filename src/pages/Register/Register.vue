@@ -21,14 +21,10 @@
       <el-input type="text" placeholder="验证码" v-model="user.code" autocomplete="off"></el-input>
       <el-button @click="sendMsg" :disabled="isSendSuccessCode">{{isSendSuccessCode?`请等待${waitDate}秒`:'发送验证码'}}</el-button>
     </el-form-item>
-    <el-form-item prop="roleId">
-      <el-radio v-model="user.roleId" label="3">学生</el-radio>
-      <el-radio v-model="user.roleId" label="2">老师</el-radio>
-    </el-form-item>
     <div style="margin-top: 20px">
 
     </div>
-    <router-link to="/register">去登陆</router-link>
+    <router-link to="/login">去登陆</router-link>
     <el-form-item style="width:100%;margin-top:10px;">
       <el-button type="primary" @click="register" style="width:100%;">注册</el-button>
     </el-form-item>
@@ -48,7 +44,7 @@
           password: '',
           secondaryPasswordConfirmation: '',
           phone: '',
-          roleId: '3',
+          roleId: '3', //默认学生
           code: '' //验证码
         },
         phoneNumberReg: /^[1][3,4,5,7,8][0-9]{9}$/, //手机号码正则

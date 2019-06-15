@@ -14,7 +14,7 @@ export default function ajax(url,data,method = GET) {
 
     if(token){
       //携带请求头
-      axios.defaults.headers.common['authorization'] = `Basic ${token}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
 

@@ -18,10 +18,13 @@ import Role from '../pages/Role/Role'
 import UserCourse from '../pages/UserCourse/UserCourse'
 import TeacherCourse from '../pages/TeacherCourse/TeacherCourse'
 
+import store from '../store'
+import * as userApi from '../api/user'
+
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/login',
@@ -99,3 +102,50 @@ export default new Router({
     }
   ]
 })
+
+/**
+ * 路由守卫
+ */
+router.beforeEach(async (to, from, next) => {
+
+  //获取路由地址
+  const path = to.path;
+
+  //登陆注册页面放行
+  if(path === '/login' || path === '/register'){
+    next();
+    return;
+  }
+
+  //从vuex中查询是否存在用户信息和token
+  let token = store.state.token;
+  if(token){
+    next();
+    return;
+  }
+
+  //查询sessionStore是否存在token
+  token = sessionStorage.getItem("token");
+
+  if(token){ //存在token表示登陆
+    //token保存到vuex中
+    store.dispatch('saveToken',token);
+
+    //查询用户信息
+    const result = await userApi.getUserInfo();
+    console.log(result)
+    if(result.success){ //获取用户信息失败
+      const userInfo = result.object;
+      store.dispatch('saveUserInfo',userInfo);
+      next();
+      return ;
+    }
+
+  }
+
+  //未登录，跳转登陆页面
+  next('/login');
+
+});
+
+export default router;

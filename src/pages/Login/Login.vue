@@ -12,7 +12,7 @@
       <el-input type="password" v-model="user.password" placeholder="密码"  show-password></el-input>
     </el-form-item>
     <el-form-item prop="code">
-      <el-input type="password" style="width: 180px;padding: 0 0" v-model="user.code" placeholder="验证码" >
+      <el-input @keyup.enter.native="login" style="width: 180px;padding: 0 0" v-model="user.code" placeholder="验证码" >
       </el-input>
       <div style="width: 100px;height: 40px;line-height: 40px;display: inline-block;padding: 0px;position: absolute;margin-left: 25px">
         <img @click="changeCode"  :src="codeUrl" alt="">
@@ -85,12 +85,14 @@
             const result = await userApi.login(user);
 
             if(result.success){
-              console.log(result.object);
-
               //获取token
               const token = result.object;
               //保存到vuex中
-              this.$store.dispatch("saveToken",token)
+              this.$store.dispatch("saveToken",token);
+              //存入sessionStore中
+              sessionStorage.setItem("token",token);
+
+              //this.getUserInfo(token);
 
               //跳转首页
               this.$router.replace("/home")
@@ -104,6 +106,17 @@
             return false;
           }
         });
+      },
+      async getUserInfo(token){
+        //获取用户信息
+        const result = await userApi.getUserInfo();
+
+        if(!result.success){
+          this.$message(result.message);
+        }
+        const userInfo = result.object;
+        this.$store.dispatch("saveUserInfo",userInfo);
+        sessionStorage.setItem("userInfo",JSON.stringify(userInfo));
       }
     }
 

@@ -3,7 +3,8 @@
  */
 import ajax from '../ajax'
 import {DELETE,GET,POST,PUT} from '../requestTypes'
-const BASE_URL = 'http://localhost:8080';
+// const BASE_URL = 'http://127.0.0.1:88/api';
+const BASE_URL = 'http://127.0.0.1:8080';
 
 const AUTH_BASE_URL = 'http://localhost:8888/auth';
 
@@ -30,3 +31,5 @@ export const addCourse = courseId => ajax(`${BASE_URL}/user/addCourse`,courseId,
 //查询用户对应的课程
 export const findCourse = () => ajax(`${BASE_URL}/user/findCourse`,{},GET);
 
+//获取用户信息
+export const getUserInfo = () => ajax(`${BASE_URL}/user/getUserInfo`,{},GET);
