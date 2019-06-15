@@ -19,6 +19,11 @@ export const login = (user) => ajax(`${AUTH_BASE_URL}/userlogin`,user,POST);
 
 export const getUser = id => ajax(`${BASE_URL}/user/${id}`,{},GET);
 
+//保存课程数据信息
+export const saveUser = (user) => ajax(`${BASE_URL}/user/save`,user,POST);
+//删除课程信息
+export const delUser = (ids) => ajax(`${BASE_URL}/user/dels`,ids,POST);
+
 //注册用户
 export const registerUser = user => ajax(`${BASE_URL}/user/register`,user,POST);
 
