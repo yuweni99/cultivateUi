@@ -92,7 +92,7 @@
               //存入sessionStore中
               sessionStorage.setItem("token",token);
 
-              //this.getUserInfo(token);
+              this.getUserInfo(token);
 
               //跳转首页
               this.$router.replace("/home")
