@@ -10,6 +10,7 @@
     </div>
     <div class="functionRight">
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
+      <el-button type="success" @click="exportTeacher">导出教师</el-button>
       <el-button type="primary" @click="delSelect">删除选中</el-button>
     </div>
     <div>
@@ -84,8 +85,8 @@
 </template>
 
 <script>
-  import * as courseApi from '../../api/course'
   import * as userApi from '../../api/user'
+  import axios from 'axios'
 
   export default {
     data() {
@@ -306,7 +307,6 @@
             const result = await userApi.saveUser(teacher);
 
             if(result.success){  //成功
-
               //讲修改后的新数据保存到课程集合中
               const user = result.object; //新的课程信息
 
@@ -346,17 +346,41 @@
 
         this.users = users;
       },
-      //查询所有的课程名称
-      async getCourses(){
+      //导出教师
+      exportTeacher(){
+        // userApi.exportTeacher();
+        const BASE_URL = 'http://127.0.0.1:8080';
+        `${BASE_URL}/excel/courseExport`
 
-        const result = await courseApi.getCourses();
+        axios({
+          method: 'post',
+          url:  `${BASE_URL}/excel/teacherExport`,
+          responseType: 'blob'
+        }).then(response => {
+          console.log(1)
+          this.download(response)
+        }).catch((error) => {
 
-        if(result.success){
-          this.courseMaps = result.object;
-          this.pageQuery();
+        })
+
+
+
+      },
+      // 下载文件
+      download (data) {
+        if (!data) {
+          return
         }
+        let url = window.URL.createObjectURL(new Blob([data]))
+        let link = document.createElement('a')
+        link.style.display = 'none'
+        link.href = url
+        link.setAttribute('download', 'excel.xlsx')
 
+        document.body.appendChild(link)
+        link.click()
       }
+
     },
     mounted() {
         this.pageQuery();

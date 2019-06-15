@@ -38,3 +38,6 @@ export const findCourse = () => ajax(`${BASE_URL}/user/findCourse`,{},GET);
 
 //获取用户信息
 export const getUserInfo = () => ajax(`${BASE_URL}/user/getUserInfo`,{},GET);
+
+//导出老师信息
+export const exportTeacher = () => ajax(`${BASE_URL}/excel/teacherExport`,{},GET);
