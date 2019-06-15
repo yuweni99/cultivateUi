@@ -333,18 +333,18 @@
       saveUser(user){
 
         //获取课程集合
-        const {users} = this;
+        const {teachers} = this;
 
         //根据id查询下标
         const index = users.findIndex((c) => c.id === user.id);
         if(index !==   -1){ //存在则为修改的数据
-          users.splice(index,1,user);
+          teachers.splice(index,1,user);
         }else{ //添加的新数据
-          users.splice(users.length-1,1); //删除最后一个数据
-          users.unshift(user); //头部添加一个新数据
+          teachers.splice(teachers.length-1,1); //删除最后一个数据
+          teachers.unshift(user); //头部添加一个新数据
         }
 
-        this.users = users;
+        this.teachers = teachers;
       },
       //导出教师
       exportTeacher(){
