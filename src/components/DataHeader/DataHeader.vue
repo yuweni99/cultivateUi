@@ -22,6 +22,7 @@
 
 
 <script>
+  import * as userApi from '../../api/user'
   import {mapActions} from 'vuex'
   export default {
     data() {
@@ -34,16 +35,24 @@
     },
     methods: {
       //注销
-      logout(){
-        //清理vuex中的数据
-        this.clearUserInfo();
-        this.clearToken();
+      async logout(){
+        const result = await userApi.logout();
 
-        //清理sessionStore中的数据
-        sessionStorage.clear();
+        if(result.success){
+          //清理vuex中的数据
+          this.clearUserInfo();
+          this.clearToken();
 
-        //跳转登陆页面
-        this.$router.replace('/login');
+          //清理sessionStore中的数据
+          sessionStorage.clear();
+
+          //跳转登陆页面
+          this.$router.replace('/login');
+        }else{
+          this.$message(result.message);
+        }
+
+
       },
       ...mapActions(['clearUserInfo','clearToken'])
 

@@ -9,7 +9,7 @@ import Course from '../pages/Course/Course'
 import Teaching from '../pages/Teaching/Teaching'
 import AlternativeTime from '../pages/AlternativeTime/AlternativeTime'
 import Classroom from '../pages/Classroom/Classroom'
-import CourseTeacher from '../pages/CourseTeacher/CourseTeacher'
+import StudentSelectCourse from '../pages/StudentSelectCourse/StudentSelectCourse'
 import User from '../pages/User/User'
 import Teacher from '../pages/Teacher/Teacher'
 import StudentTeaching from "../pages/StudentTeaching/StudentTeaching";
@@ -17,6 +17,7 @@ import Permission from '../pages/Permission/Permission'
 import Role from '../pages/Role/Role'
 import UserCourse from '../pages/UserCourse/UserCourse'
 import TeacherCourse from '../pages/TeacherCourse/TeacherCourse'
+import TeachingSelectCourse from '../pages/TeachingSelectCourse/TeachingSelectCourse'
 
 import store from '../store'
 import * as userApi from '../api/user'
@@ -43,6 +44,10 @@ const router = new Router({
           component: Course,
         },
         {
+          path: 'teachingSelectCourse',
+          component: TeachingSelectCourse,
+        },
+        {
           path: 'teaching',
           component: Teaching,
         },
@@ -55,8 +60,8 @@ const router = new Router({
           component: Classroom,
         },
         {
-          path: 'courseTeacher',
-          component: CourseTeacher,
+          path: 'studentSelectCourse',
+          component: StudentSelectCourse,
         },
         {
           path: 'user',

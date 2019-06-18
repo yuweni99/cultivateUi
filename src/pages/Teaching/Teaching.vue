@@ -18,20 +18,24 @@
         v-loading="loading">
         <el-table-column
           prop="id"
+          width="50"
           label="id">
         </el-table-column>
 
         <el-table-column
           prop="price"
+          width="100"
           label="课程价格">
         </el-table-column>
 
         <el-table-column
           prop="courseName"
+          width="200"
           label="课程名称">
         </el-table-column>
         <el-table-column
           prop="statusName"
+          width="50"
           label="课程状态">
         </el-table-column>
         <el-table-column
@@ -39,29 +43,39 @@
           label="课时描述">
         </el-table-column>
         <el-table-column
+          width="50"
           prop="courseNum"
           label="课时顺序">
         </el-table-column>
         <el-table-column
+          width="100"
           prop="classroomName"
           label="教室名称">
-        </el-table-column>
-        <el-table-column
-          prop="createTime"
-          label="创建时间">
         </el-table-column>
         <el-table-column  label="操作">
           <template slot-scope="scope">
             <el-button
-              v-if="scope.row.status === 0"
               size="mini"
+              type="danger"
+              v-if="scope.row.status === 0"
+              @click="openSignInPage(scope.row.id)">签到
+            </el-button>
+            <el-button
+              size="mini"
+              v-if="scope.row.status === 0"
               @click="toEdit(scope.row.id)">编辑
             </el-button>
             <el-button
-              v-if="scope.row.status === 0"
+
               size="mini"
               type="danger"
+              v-if="scope.row.status === 0"
               @click="del(scope.row.id)">删除
+            </el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="openCourseUserPage(scope.row.id)">预约同学
             </el-button>
           </template>
         </el-table-column>
@@ -113,6 +127,26 @@
         </el-form>
       </el-dialog>
     </div>
+
+    <div>
+      <el-dialog :visible="showCourseUserPage" title="学生列表" :before-close="closeCourseUserPage">
+        <CourseUser :teachingId="teachingId"/>
+      </el-dialog>
+    </div>
+
+    <div>
+      <el-dialog :visible="showSignInPage" title="发起签到" :before-close="closeSignInPage">
+        <el-form status-icon  ref="signInFrom" :rules="signRules" :model="signIn" label-width="150px">
+          <el-form-item label="签到时间有效期" prop="minute">
+            <el-input type="number" min="0" v-model="signIn.minute"/>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="saveSignIn">保存</el-button>
+            <el-button @click="closeSignInPage">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -120,12 +154,23 @@
 
   import * as teachingApi from '../../api/teaching'
   import * as altTimeApi from '../../api/altTime'
+  import * as checkApi from '../../api/checkIn/'
   import * as courseTeacherApi from '../../api/courseTeacher'
   import * as classroomApi from '../../api/classroom'
+  import CourseUser from '../../components/CourseUser/CourseUser'
 
   export default {
+    components: {
+      CourseUser
+    },
     data() {
       return {
+        signIn: {
+          minute: '',//签到时间
+        },
+        teachingId: '',
+        showCourseUserPage: false, //是否打开组件
+        showSignInPage: false, //签到组件
         isAdd: false, //表单操作类型
         teaching: {
           id:'',
@@ -181,10 +226,56 @@
           teachingDate: [
             { required: true, message: '上课日期不能为空', trigger: 'blur' }
           ]
+        },
+        signRules:{
+          minute: [
+            { required: true, message: '签到时间不能为空', trigger: 'blur' }
+          ]
         }
       }
     },
     methods: {
+      //签到
+      saveSignIn(){
+        //校验表单
+        this.$refs.signInFrom.validate(async (valid) => {
+          if (valid) {
+            const {teachingId,signIn} = this;
+            const result = await checkApi.teacherSendCheck({teachingId,minute: signIn.minute});
+            if(result.success){  //成功
+
+              this.$message({
+                message: '操作成功',
+                type: 'success'
+              });
+              //关闭弹出层
+              this.closeSignInPage();
+              this.pageQuery();
+            }else{ //失败
+              this.$message(result.message);
+            }
+
+          } else {
+            return false;
+          }
+        });
+
+      },
+      openSignInPage(id){
+        this.teachingId = id;
+        this.showSignInPage = true;
+      },
+      closeSignInPage(){
+        this.signIn.minute = null;
+        this.showSignInPage = false;
+      },
+      openCourseUserPage(id){
+        this.teachingId = id;
+        this.showCourseUserPage = true;
+      },
+      closeCourseUserPage(){
+        this.showCourseUserPage = false;
+      },
       // 表格内删除按钮点击实现
       async toEdit(id) {
         //打开弹出层页面

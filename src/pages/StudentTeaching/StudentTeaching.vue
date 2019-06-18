@@ -39,14 +39,13 @@
             <el-button
               size="mini"
               type="danger"
-              @click="toEdit(scope.row.id,3)">查看详情
+              v-if="scope.row.status === '1' && scope.row.is_sign_in === '1'"
+              @click="signIn(scope.row.teachingId)">签到
             </el-button>
-
             <el-button
-              v-if="scope.row.status === '1'"
               size="mini"
               type="danger"
-              @click="findCurrentTeachingUser(scope.row.id,1)">查看同学
+              @click="toEdit(scope.row.id,3)">查看详情
             </el-button>
               <el-button
                 v-if="scope.row.status === '0' || scope.row.status === '3'"
@@ -111,6 +110,8 @@
 
 <script>
   import * as studentTeachingApi from '../../api/studentTeaching'
+
+  import * as checkInApi from '../../api/checkIn'
   export default {
     data() {
       return {
@@ -160,12 +161,6 @@
           this.$message(result.message);
         }
       },
-      //查看当前课时下的学生
-      findCurrentTeachingUser(){
-
-
-
-      },
       //查看详细信息
       async toEdit(id){
         this.changeEditPageState();
@@ -179,6 +174,24 @@
           this.$message(result.message);
         }
       },
+      //签到
+      async signIn(teachingId){
+
+        const result = await checkInApi.studentCheck(teachingId);
+
+        if(result.success){
+          this.$message({
+            message: '签到成功',
+            type: 'info'
+          });
+          //刷新列表
+          this.pageQuery();
+        }else{
+          this.$message(result.message);
+        }
+
+      },
+
       //预定课时
       async fixInAdvanceTeaching(id,status){
         const result = await studentTeachingApi.fixInAdvanceTeaching(id,status);

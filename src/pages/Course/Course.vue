@@ -9,8 +9,14 @@
       <el-button class="searchButton" @click="pageQuery">搜索</el-button>
     </div>
     <div class="functionRight">
+      <el-button @click="exportCourse">导出课程</el-button>
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
       <el-button type="primary" @click="delSelect">删除选中</el-button>
+    </div>
+    <div class="file-upload">
+      <div class="file-upload-text">导入课程</div>
+      <input name="file" @change="importCourse" class="file-upload-input" id="file" type="file"
+             accept="application/vnd.ms-excel">
     </div>
     <div>
       <el-table
@@ -79,7 +85,8 @@
     </div>
     <div>
       <el-dialog :visible="dialogVisible" :title="title" :before-close="changeEditPageState">
-        <el-form v-loading="!course.id && !isAdd" status-icon ref="courseForm" :model="course" :rules="rules" label-width="150px">
+        <el-form v-loading="!course.id && !isAdd" status-icon ref="courseForm" :model="course" :rules="rules"
+                 label-width="150px">
           <el-form-item label="课程名称:" prop="name">
             <el-input v-model="course.name"/>
           </el-form-item>
@@ -105,11 +112,14 @@
 <script>
 
   import * as courseApi from '../../api/course'
+  import {uploadFile} from '../../utils/uploadUtils'
 
+  const BASE_URL = 'http://127.0.0.1:8080';
   export default {
     data() {
       return {
-        isAdd :false,
+        importCourseUrl: `${BASE_URL}/excel/courseImport`,
+        isAdd: false,
         course: {
           id: '',
           name: '',
@@ -335,7 +345,40 @@
         }
 
         this.courses = courses;
-      }
+      },
+      exportCourse() {
+        location.href = `${BASE_URL}/excel/courseExport`
+      },
+      async importCourse(event) {
+
+        let file = event.target.files[0];
+
+        let param = new FormData(); //创建form对象
+        param.append('file', file);//通过append向form对象添加数据
+
+        if (!param.get('file').name) {
+          return;
+        }
+
+        const importCourseUrl = this.importCourseUrl; //上传地址
+
+        const result = await uploadFile(importCourseUrl, param);
+
+        if (result.success) {
+          this.$message({
+            message: '导入成功',
+            type: 'info'
+          });
+
+          this.pageQuery();
+        } else {
+          this.$message(result.message);
+        }
+
+        event.target.name = undefined;
+
+
+      },
     },
     mounted() {
 
@@ -361,6 +404,32 @@
   .functionRight {
     display: inline-block;
     float: right;
+  }
+
+  .file-upload {
+    width: 60px;
+    height: 26px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #0F996B;
+    display: inline-block;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #0F996B;
+    text-align: center;
+    line-height: 26px;
+    float: right;
+    margin: 10px 0 auto auto;
+  }
+
+  .file-upload-input {
+    background-color: transparent;
+    position: absolute;
+    width: 999px;
+    height: 999px;
+    top: -10px;
+    right: -10px;
+    cursor: pointer;
   }
 
 </style>

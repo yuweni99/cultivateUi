@@ -17,14 +17,15 @@
     <el-form-item prop="phone">
       <el-input type="text" placeholder="手机号码" v-model="user.phone" autocomplete="off"></el-input>
     </el-form-item>
-    <el-form-item prop="code">
-      <el-input type="text" placeholder="验证码" v-model="user.code" autocomplete="off"></el-input>
-      <el-button @click="sendMsg" :disabled="isSendSuccessCode">{{isSendSuccessCode?`请等待${waitDate}秒`:'发送验证码'}}</el-button>
+    <el-form-item prop="code" style="display: inline-block">
+
+      <el-input style="display: inline-block;width: 210px"  type="text" placeholder="验证码" v-model="user.code" autocomplete="off"></el-input>
+      <el-button  @click="sendMsg" :disabled="isSendSuccessCode">{{isSendSuccessCode?`请等待${waitDate}秒`:'发送验证码'}}</el-button>
     </el-form-item>
     <div style="margin-top: 20px">
 
     </div>
-    <router-link to="/login">去登陆</router-link>
+    <router-link to="/login" style="">去登陆</router-link>
     <el-form-item style="width:100%;margin-top:10px;">
       <el-button type="primary" @click="register" style="width:100%;">注册</el-button>
     </el-form-item>

@@ -13,7 +13,9 @@ export const pageQueryUser = (pageNum,pageSize,searchUser) => ajax(`${BASE_URL}/
 export const pageQueryTeacher = (pageNum,pageSize,searchUser) => ajax(`${BASE_URL}/user/pageQueryTeacher/${pageNum}/${pageSize}`,searchUser,POST);
 
 //根据课程id查询用户列表
-export const pageQueryTeacherCourse = (pageNum,pageSize,ctId,searchUser) => ajax(`${BASE_URL}/user/pageQueryTeacherCourse/${pageNum}/${pageSize}/${ctId}`,searchUser,POST);
+export const pageQueryTeacherCourse = (pageNum,pageSize,ctId,searchUser) => ajax(`${BASE_URL}/user/pageQuerySelectCourseUser/${pageNum}/${pageSize}/${ctId}`,searchUser,POST);
+//根据课时id查询用户列表
+export const pageQuerySelectTeachingUser = (pageNum,pageSize,teachingId,searchUser) => ajax(`${BASE_URL}/user/pageQuerySelectTeachingUser/${pageNum}/${pageSize}/${teachingId}`,searchUser,POST);
 
 export const login = (user) => ajax(`${AUTH_BASE_URL}/userlogin`,user,POST);
 
@@ -22,7 +24,7 @@ export const getUser = id => ajax(`${BASE_URL}/user/${id}`,{},GET);
 //保存课程数据信息
 export const saveUser = (user) => ajax(`${BASE_URL}/user/save`,user,POST);
 //删除课程信息
-export const delUser = (ids) => ajax(`${BASE_URL}/user/dels`,ids,POST);
+export const delUsers = (ids) => ajax(`${BASE_URL}/user/dels`,ids,POST);
 
 //注册用户
 export const registerUser = user => ajax(`${BASE_URL}/user/register`,user,POST);
@@ -41,3 +43,6 @@ export const getUserInfo = () => ajax(`${BASE_URL}/user/getUserInfo`,{},GET);
 
 //导出老师信息
 export const exportTeacher = () => ajax(`${BASE_URL}/excel/teacherExport`,{},GET);
+
+//退出
+export const logout = () => ajax(`${BASE_URL}/user/logout`,{},GET);

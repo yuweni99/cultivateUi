@@ -9,9 +9,15 @@
       <el-button class="searchButton" @click="pageQuery">搜索</el-button>
     </div>
     <div class="functionRight">
+      <el-button @click="exportTeacher">导出教师</el-button>
+
       <el-button type="success" @click="openEditPage(true)">添加</el-button>
-      <el-button type="success" @click="exportTeacher">导出教师</el-button>
       <el-button type="primary" @click="delSelect">删除选中</el-button>
+    </div>
+
+    <div class="file-upload">
+      <div class="file-upload-text">导入教师</div>
+      <input name="file" @change="importTeacher" class="file-upload-input" id="file" type="file" accept="application/vnd.ms-excel">
     </div>
     <div>
       <el-table
@@ -86,11 +92,15 @@
 
 <script>
   import * as userApi from '../../api/user'
-  import axios from 'axios'
+  import {uploadFile} from '../../utils/uploadUtils'
+
+  const BASE_URL = 'http://127.0.0.1:8080';
 
   export default {
+
     data() {
       return {
+        importTeacherUrl: `${BASE_URL}/excel/teacherImport`,
         isAdd: false, //表单操作类型
         teacher: {
           id:'',
@@ -318,6 +328,8 @@
               });
               //关闭弹出层
               this.changeEditPageState();
+              //刷新页面
+              this.pageQuery();
             }else{ //失败
               this.$message(result.message);
             }
@@ -326,6 +338,46 @@
             return false;
           }
         });
+
+      },
+      exportTeacher(){
+        location.href = `${BASE_URL}/excel/teacherExport`
+      },
+      importTeacher(event){
+
+
+        let file = event.target.files[0];
+
+        let param = new FormData(); //创建form对象
+        param.append('file',file);//通过append向form对象添加数据
+
+        if(!param.get('file').name){
+          return ;
+        }
+
+        this.$confirm('请注意，导入教师默认登陆密码为1!', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+
+          const importTeacherUrl = this.importTeacherUrl; //上传地址
+
+          const result = await uploadFile(importTeacherUrl,param);
+
+          if(result.success){
+            this.$message({
+              message: '导入成功',
+              type: 'info'
+            });
+
+            this.pageQuery();
+          }else{
+            this.$message(result.message);
+          }
+
+          event.target.name = undefined;
+        })
 
 
       },
@@ -336,8 +388,8 @@
         const {teachers} = this;
 
         //根据id查询下标
-        const index = users.findIndex((c) => c.id === user.id);
-        if(index !==   -1){ //存在则为修改的数据
+        const index = teachers.findIndex((c) => c.id === user.id);
+        if(index !==  -1){ //存在则为修改的数据
           teachers.splice(index,1,user);
         }else{ //添加的新数据
           teachers.splice(teachers.length-1,1); //删除最后一个数据
@@ -346,40 +398,6 @@
 
         this.teachers = teachers;
       },
-      //导出教师
-      exportTeacher(){
-        // userApi.exportTeacher();
-        const BASE_URL = 'http://127.0.0.1:8080';
-        `${BASE_URL}/excel/courseExport`
-
-        axios({
-          method: 'post',
-          url:  `${BASE_URL}/excel/teacherExport`,
-          responseType: 'blob'
-        }).then(response => {
-          console.log(1)
-          this.download(response)
-        }).catch((error) => {
-
-        })
-
-
-
-      },
-      // 下载文件
-      download (data) {
-        if (!data) {
-          return
-        }
-        let url = window.URL.createObjectURL(new Blob([data]))
-        let link = document.createElement('a')
-        link.style.display = 'none'
-        link.href = url
-        link.setAttribute('download', 'excel.xlsx')
-
-        document.body.appendChild(link)
-        link.click()
-      }
 
     },
     mounted() {
@@ -405,6 +423,31 @@
   .functionRight {
     display: inline-block;
     float: right;
+  }
+
+  .file-upload {
+    width: 60px;
+    height: 26px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #0F996B ;
+    display: inline-block;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #0F996B;
+    text-align: center;
+    line-height: 26px;
+    float: right;
+    margin: 10px 0 auto auto;
+  }
+  .file-upload-input {
+    background-color: transparent;
+    position: absolute;
+    width: 999px;
+    height: 999px;
+    top: -10px;
+    right: -10px;
+    cursor: pointer;
   }
 
 </style>

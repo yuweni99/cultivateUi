@@ -11,13 +11,15 @@
     <el-form-item prop="password">
       <el-input type="password" v-model="user.password" placeholder="密码"  show-password></el-input>
     </el-form-item>
-    <el-form-item prop="code">
-      <el-input @keyup.enter.native="login" style="width: 180px;padding: 0 0" v-model="user.code" placeholder="验证码" >
-      </el-input>
-      <div style="width: 100px;height: 40px;line-height: 40px;display: inline-block;padding: 0px;position: absolute;margin-left: 25px">
-        <img @click="changeCode"  :src="codeUrl" alt="">
-      </div>
-    </el-form-item>
+    <div>
+      <el-form-item prop="code">
+        <el-input @keyup.enter.native="login" style="width: 180px;padding: 0 0" v-model="user.code" placeholder="验证码" >
+        </el-input>
+        <div style="width: 100px;height: 40px;line-height: 40px;display: inline-block;padding: 0px;position: absolute;margin-left: 25px">
+          <img @click="changeCode"  :src="codeUrl" alt="">
+        </div>
+      </el-form-item>
+    </div>
     <router-link to="/register">去注册</router-link>
     <el-form-item style="width:100%;margin-top:10px;">
       <el-button type="primary" @click="login" style="width:100%;">登录</el-button>

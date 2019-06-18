@@ -12,3 +12,5 @@ export const getCourseTeacherPageQuery = (pageNum,pageSize,searchStudentTeaching
 export const findTeacherCourse = () => ajax(`${BASE_URL}/courseTeacher/findTeacherCourse`,{},GET);
 //分页查询教师对应课程
 export const getPageQueryTeacherCourse = (pageNum,pageSize,searchStudentTeaching) => ajax(`${BASE_URL}/courseTeacher/pageQueryTeacherCourse/${pageNum}/${pageSize}`,searchStudentTeaching,POST);
+//选择课程
+export const selectCourse = (courseId) => ajax(`${BASE_URL}/courseTeacher/selectCourse/${courseId}`,{},GET);

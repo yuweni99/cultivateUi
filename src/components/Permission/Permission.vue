@@ -54,6 +54,12 @@
           <el-form-item v-if="isShowPermissionUrlInput" label="许可路径:" prop="url">
             <el-input v-model="permission.url"/>
           </el-form-item>
+          <el-form-item v-if="isShowPermissionUrlInput" label="许可code:" prop="code">
+            <el-input v-model="permission.code"/>
+          </el-form-item>
+          <el-form-item label="icon:" >
+            <el-input v-model="permission.icon"/>
+          </el-form-item>
           <el-form-item prop="type" label="许可类型">
             <el-radio v-model="permission.type" label="0">菜单</el-radio>
             <el-radio v-model="permission.type" label="1">按钮</el-radio>
@@ -95,11 +101,15 @@
           id: '',
           name: '',
           url: '',
+          code: '',
           type: '0', //类型
         },
         rules: {
           name: [
             {required: true, message: '许可名称不能为空', trigger: 'blur'}
+          ],
+          code: [
+            {required: true, message: '许可code不能为空', trigger: 'blur'}
           ],
           url: [
             {required: true, message: '许可路径不能为空', trigger: 'blur'}

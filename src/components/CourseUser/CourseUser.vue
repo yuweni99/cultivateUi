@@ -27,10 +27,6 @@
           prop="phone"
           label="手机号">
         </el-table-column>
-        <el-table-column v-if="isShowCourseName"
-                         prop="courseName"
-                         label="课程名称">
-        </el-table-column>
       </el-table>
       <el-pagination class="page"
                      @current-change="handleCurrentChange"
@@ -51,6 +47,7 @@
   export default {
     props: {
       ctId: Number,
+      teachingId: Number
     },
     data() {
       return {
@@ -76,7 +73,15 @@
         const {pageSize, pageNum, searchName} = this.pageRequestParams;
         //构建搜索过滤对象
         const searchUser = {searchName};
-        const result = await userApi.pageQueryTeacherCourse(pageNum, pageSize,this.ctId, searchUser);
+
+        const {ctId,teachingId} = this;
+
+        let result;
+        if(ctId){
+          result = await userApi.pageQueryTeacherCourse(pageNum, pageSize,ctId, searchUser);
+        }else{
+          result = await userApi.pageQuerySelectTeachingUser(pageNum, pageSize,teachingId, searchUser);
+        }
 
         if (result.success) {
           //获取课程集合

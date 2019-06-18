@@ -12,6 +12,6 @@ export const getTeaching = id => ajax(`${BASE_URL}/teaching/${id}`,{},GET);
 //保存课时数据信息
 export const saveTeaching = (course) => ajax(`${BASE_URL}/teaching/save`,course,POST);
 //删除课时信息
-export const delTeaching = (id) => ajax(`${BASE_URL}/teaching/del/${id}`,ids,DELETE);
+export const delTeaching = (id) => ajax(`${BASE_URL}/teaching/${id}`,{},DELETE);
 
 
